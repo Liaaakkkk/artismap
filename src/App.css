@@ -1,0 +1,277 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  background: #19151d;
+}
+
+button {
+  font-family: inherit;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #392d46;
+  color: #fff4e7;
+  padding-bottom: 85px;
+}
+/* CABEÇALHO */
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 20px 18px;
+}
+
+.top-bar h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.top-bar p {
+  margin: 2px 0 0;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  color: #d7c8dc;
+}
+
+.back-button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #54465f;
+  color: #fff4e7;
+  font-size: 25px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+/* CALENDÁRIO */
+
+.calendar {
+  margin: 0 16px;
+  padding: 12px 12px 18px;
+  border-radius: 15px;
+  background: #fff0dc;
+  color: #37273f;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.calendar-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.month-button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #c4e1e6;
+  color: #43535c;
+  font-size: 23px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 5px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-size: 7px;
+  color: #9a8d8b;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-day {
+  position: relative;
+  height: 28px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #38263f;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.calendar-day:hover:not(:disabled) {
+  background: #eadaca;
+}
+
+.calendar-day:disabled {
+  cursor: default;
+}
+
+.calendar-day.selected {
+  background: #392d46;
+  color: #fff4e7;
+  font-weight: bold;
+}
+
+.event-dot {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #9e8b96;
+}
+
+.calendar-day.selected .event-dot {
+  background: #c4e1e6;
+}
+
+/* EVENTOS */
+
+.events-section {
+  padding: 14px 16px 0;
+}
+
+.selected-date {
+  margin: 0 0 9px;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #a99cac;
+}
+
+.event-card {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 17px 14px;
+  border: none;
+  border-radius: 14px;
+  background: #51445a;
+  color: #fff4e7;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+}
+
+.event-category {
+  margin-bottom: 7px;
+  font-family: Arial, sans-serif;
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #c7b6cc;
+}
+
+.event-content h3 {
+  margin: 0 0 5px;
+  font-size: 14px;
+}
+
+.event-info {
+  margin: 3px 0;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  color: #d7cbd9;
+}
+
+.empty-state {
+  padding: 20px;
+  border-radius: 14px;
+  background: #51445a;
+  text-align: center;
+}
+
+.empty-state p {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  color: #d7cbd9;
+}
+
+/* MENU INFERIOR */
+
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 10;
+  display: flex;
+  width: 100%;
+  max-width: 430px;
+  height: 72px;
+  transform: translateX(-50%);
+  background: #fff0dc;
+  box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.bottom-navigation button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #a3cbd4;
+  cursor: pointer;
+}
+
+.bottom-navigation span {
+  display: block;
+  margin-bottom: 3px;
+  font-family: Arial, sans-serif;
+  font-size: 21px;
+}
+
+.bottom-navigation small {
+  font-family: Arial, sans-serif;
+  font-size: 8px;
+}
+
+/* DESKTOP */
+
+@media (min-width: 700px) {
+  body {
+    padding: 30px 0;
+  }
+
+  .app {
+    position: relative;
+    min-height: calc(100vh - 60px);
+    border-radius: 28px;
+    overflow: hidden;
+  }
+
+  .bottom-navigation {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    height: 72px;
+    transform: none;
+    margin: 0;
+  }
+}
