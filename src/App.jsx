@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import Calendar from "./components/Calendar";
 import EventCard from "./components/EventCard";
+import CatalogoEventos from "./pages/CatalogoEventos";
 import "./App.css";
+
 
 const initialEvents = [
   {
@@ -46,19 +48,27 @@ const initialEvents = [
   }
 ];
 
+
 function App() {
+
+  const [telaAtual, setTelaAtual] = useState("agenda");
+
   const [currentDate, setCurrentDate] = useState(
     new Date(2026, 8, 15)
   );
+
 
   const [selectedDate, setSelectedDate] = useState(
     new Date(2026, 8, 15)
   );
 
+
   const [events] = useState(initialEvents);
+
 
   const selectedEvents = useMemo(() => {
     if (!selectedDate) return [];
+
 
     const dateString = `${selectedDate.getFullYear()}-${String(
       selectedDate.getMonth() + 1
@@ -66,8 +76,10 @@ function App() {
       selectedDate.getDate()
     ).padStart(2, "0")}`;
 
+
     return events.filter((event) => event.date === dateString);
   }, [selectedDate, events]);
+
 
   function handlePreviousMonth() {
     setCurrentDate(
@@ -79,6 +91,7 @@ function App() {
     );
   }
 
+
   function handleNextMonth() {
     setCurrentDate(
       new Date(
@@ -89,8 +102,10 @@ function App() {
     );
   }
 
+
   function handleDateChange(date) {
     setSelectedDate(date);
+
 
     if (
       date.getMonth() !== currentDate.getMonth() ||
@@ -106,8 +121,10 @@ function App() {
     }
   }
 
+
   function formatSelectedDate() {
     if (!selectedDate) return "";
+
 
     return selectedDate.toLocaleDateString("pt-BR", {
       day: "2-digit",
@@ -116,6 +133,7 @@ function App() {
     });
   }
 
+
   function handleEventClick(event) {
     alert(
       `Evento selecionado: ${event.title}\n\n` +
@@ -123,6 +141,13 @@ function App() {
     );
   }
 
+if (telaAtual === "catalogo") {
+  return (
+    <CatalogoEventos
+      onVoltar={() => setTelaAtual("agenda")}
+    />
+  );
+}
   return (
     <main className="app">
       <header className="top-bar">
@@ -130,11 +155,19 @@ function App() {
           ‹
         </button>
 
+
         <div>
           <h1>Agenda</h1>
           <p>Eventos culturais do mês</p>
         </div>
+        <button
+  className="catalogo-button"
+  onClick={() => setTelaAtual("catalogo")}
+>
+  Catálogo
+</button>
       </header>
+
 
       <Calendar
         currentDate={currentDate}
@@ -145,10 +178,12 @@ function App() {
         onNextMonth={handleNextMonth}
       />
 
+
       <section className="events-section">
         <p className="selected-date">
           {formatSelectedDate()}
         </p>
+
 
         {selectedEvents.length > 0 ? (
           selectedEvents.map((event) => (
@@ -165,16 +200,19 @@ function App() {
         )}
       </section>
 
+
       <nav className="bottom-navigation">
         <button>
           <span>⌂</span>
           <small>Explorar</small>
         </button>
 
+
         <button>
           <span>♡</span>
           <small>Salvos</small>
         </button>
+
 
         <button>
           <span>♙</span>
@@ -184,5 +222,6 @@ function App() {
     </main>
   );
 }
+
 
 export default App;
