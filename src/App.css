@@ -602,3 +602,337 @@ body {
     bottom: 25px;
   }
 }
+
+/* =========================================
+   LOGIN
+========================================= */
+
+.login-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  box-sizing: border-box;
+
+  background: #efeaff;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+
+  padding: 32px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border-radius: 24px;
+
+  box-shadow: 0 8px 30px rgba(64, 50, 82, 0.15);
+
+  position: relative;
+}
+
+/* Botão voltar */
+
+.login-back-button {
+  border: none;
+
+  background: transparent;
+
+  color: #564787;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  padding: 0;
+}
+
+.login-back-button:hover {
+  text-decoration: underline;
+}
+
+/* Cabeçalho */
+
+.login-header {
+  margin-top: 24px;
+  margin-bottom: 28px;
+
+  text-align: center;
+}
+
+.login-header h1 {
+  margin: 0;
+
+  color: #564787;
+
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.login-header p {
+  margin-top: 8px;
+
+  color: #6f6780;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+/* Campos */
+
+.login-field {
+  margin-bottom: 18px;
+}
+
+.login-field label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #403252;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.login-field input {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 13px 14px;
+
+  border: 2px solid #ddd7e8;
+
+  border-radius: 12px;
+
+  outline: none;
+
+  font-size: 14px;
+
+  background: #faf9fc;
+
+  color: #403252;
+
+  transition: border-color 0.2s ease;
+}
+
+.login-field input::placeholder {
+  color: #aaa3b5;
+}
+
+.login-field input:focus {
+  border-color: #7b61ff;
+
+  background: #ffffff;
+}
+
+/* Senha */
+
+.password-container {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  padding-right: 85px;
+}
+
+.show-password {
+  position: absolute;
+
+  right: 10px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #564787;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.show-password:hover {
+  text-decoration: underline;
+}
+
+/* Erro */
+
+.login-error {
+  margin: 8px 0 16px;
+
+  color: #c0392b;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+/* Botão entrar */
+
+.login-button {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #564787;
+
+  color: #ffffff;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-1px);
+
+  opacity: 0.92;
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+/* Cadastro */
+
+.login-register {
+  margin-top: 22px;
+
+  text-align: center;
+
+  color: #6f6780;
+
+  font-size: 13px;
+}
+
+.login-register button {
+  margin-left: 5px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #564787;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.login-register button:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   PERFIL
+========================================= */
+
+.profile-screen {
+  min-height: 100vh;
+  background: #efeaff;
+}
+
+.profile-page {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 30px 24px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.profile-back-button {
+  display: block;
+  border: none;
+  background: transparent;
+  color: #564787;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 45px;
+}
+
+.profile-back-button:hover {
+  text-decoration: underline;
+}
+
+.profile-avatar {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #564787;
+  color: white;
+  font-size: 42px;
+
+  box-shadow: 0 6px 18px rgba(64, 50, 82, 0.2);
+}
+
+.profile-page h1 {
+  margin: 0;
+  color: #403252;
+  font-size: 26px;
+}
+
+.profile-email-page {
+  margin-top: 8px;
+  color: #6f6780;
+  font-size: 14px;
+}
+
+.logout-button {
+  margin-top: 30px;
+  width: 100%;
+  max-width: 300px;
+
+  padding: 13px 20px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #c0392b;
+  color: white;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  opacity: 0.9;
+}

@@ -7,6 +7,13 @@ import SearchBar from "./components/SearchBar";
 import CategoryFilters from "./components/CategoryFilters";
 import MapView from "./components/MapView";
 import UserLocationButton from "./components/UserLocationButton";
+import Login from "./components/Login";
+import Cadastro from "./components/Cadastro";
+
+import {
+  obterUsuario,
+  logoutUsuario,
+} from "./utils/auth";
 
 import culturalPoints from "./data/culturalPoints";
 
@@ -55,13 +62,26 @@ function App() {
   // CONTROLE DA TELA
   // --------------------------------
 
-  const [telaAtual, setTelaAtual] = useState("mapa");
+  const [telaAtual, setTelaAtual] = useState(() => {
+  const usuarioSalvo = obterUsuario();
+  
+  return usuarioSalvo ? "mapa" : "login";
+});
+
+  // --------------------------------
+  // USUÁRIO / LOGIN
+  // --------------------------------
+
+  const [usuario, setUsuario] = useState(() => {
+    return obterUsuario();
+  });
 
   // --------------------------------
   // ESTADOS DO MAPA
   // --------------------------------
 
-  const [selectedCategory, setSelectedCategory] = useState("todos");
+  const [selectedCategory, setSelectedCategory] =
+    useState("todos");
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -82,6 +102,24 @@ function App() {
   const [events] = useState(initialEvents);
 
   // --------------------------------
+  // LOGIN
+  // --------------------------------
+
+  function handleLogin(usuarioLogado) {
+    setUsuario(usuarioLogado);
+
+    setTelaAtual("mapa");
+  }
+
+  function handleLogout() {
+    logoutUsuario();
+
+    setUsuario(null);
+
+    setTelaAtual("login");
+  }
+
+  // --------------------------------
   // FILTRO DOS PONTOS DO MAPA
   // --------------------------------
 
@@ -97,10 +135,18 @@ function App() {
 
       const matchesSearch =
         normalizedSearch === "" ||
-        point.name.toLowerCase().includes(normalizedSearch) ||
-        point.description.toLowerCase().includes(normalizedSearch) ||
-        point.address.toLowerCase().includes(normalizedSearch) ||
-        point.city.toLowerCase().includes(normalizedSearch);
+        point.name
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        point.description
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        point.address
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        point.city
+          .toLowerCase()
+          .includes(normalizedSearch);
 
       return matchesCategory && matchesSearch;
     });
@@ -117,8 +163,12 @@ function App() {
 
     const dateString =
       `${selectedDate.getFullYear()}-` +
-      `${String(selectedDate.getMonth() + 1).padStart(2, "0")}-` +
-      `${String(selectedDate.getDate()).padStart(2, "0")}`;
+      `${String(
+        selectedDate.getMonth() + 1
+      ).padStart(2, "0")}-` +
+      `${String(
+        selectedDate.getDate()
+      ).padStart(2, "0")}`;
 
     return events.filter(
       (event) => event.date === dateString
@@ -181,8 +231,75 @@ function App() {
   function handleEventClick(event) {
     alert(
       `Evento selecionado: ${event.title}\n\n` +
-      `Esta ação será conectada à página completa do evento no PB04.`
+        `Esta ação será conectada à página completa do evento no PB04.`
     );
+  }
+
+  // --------------------------------
+  // TELA DE LOGIN
+  // --------------------------------
+
+  if (telaAtual === "login") {
+    return (
+    <Login
+    onLogin={handleLogin}
+    onCriarConta={() =>
+      setTelaAtual("cadastro")
+    }
+    />
+  );
+}
+
+if (telaAtual === "cadastro") {
+  return (
+    <Cadastro
+      onCadastro={(usuario) => {
+        setUsuario(usuario);
+        setTelaAtual("mapa");
+      }}
+      onVoltar={() =>
+        setTelaAtual("login")
+      }
+    />
+  );
+}
+
+  // --------------------------------
+// TELA DO PERFIL
+// --------------------------------
+
+  if (telaAtual === "perfil") {
+    return (
+      <main className="app profile-screen">
+        <section className="profile-page">
+          <button
+            type="button"
+            className="profile-back-button"
+            onClick={() => setTelaAtual("mapa")}
+          >
+            ← Voltar
+          </button>
+
+          <div className="profile-avatar">
+           👤
+          </div>
+
+          <h1>Meu perfil</h1>
+
+          <p className="profile-email-page">
+            {usuario?.email}
+          </p>
+
+          <button
+            type="button"
+            className="logout-button"
+            onClick={handleLogout}
+          >
+           Sair da conta
+          </button>
+       </section>
+      </main>
+   );
   }
 
   // --------------------------------
@@ -204,9 +321,7 @@ function App() {
   if (telaAtual === "agenda") {
     return (
       <main className="app agenda-screen">
-
         <header className="top-bar">
-
           <button
             className="back-button"
             aria-label="Voltar"
@@ -226,7 +341,6 @@ function App() {
           >
             Catálogo
           </button>
-
         </header>
 
         <Calendar
@@ -239,7 +353,6 @@ function App() {
         />
 
         <section className="events-section">
-
           <p className="selected-date">
             {formatSelectedDate()}
           </p>
@@ -249,7 +362,9 @@ function App() {
               <EventCard
                 key={event.id}
                 event={event}
-                onClick={() => handleEventClick(event)}
+                onClick={() =>
+                  handleEventClick(event)
+                }
               />
             ))
           ) : (
@@ -259,11 +374,9 @@ function App() {
               </p>
             </div>
           )}
-
         </section>
 
         <nav className="bottom-navigation">
-
           <button
             className="bottom-item"
             onClick={() => setTelaAtual("mapa")}
@@ -277,13 +390,20 @@ function App() {
             <small>Salvos</small>
           </button>
 
-          <button className="bottom-item">
+          <button
+            className="bottom-item"
+            onClick={() => {
+              if (usuario) {
+                setTelaAtual("mapa");
+              } else {
+                setTelaAtual("login");
+              }
+            }}
+          >
             <span>♙</span>
             <small>Perfil</small>
           </button>
-
         </nav>
-
       </main>
     );
   }
@@ -294,11 +414,8 @@ function App() {
 
   return (
     <main className="app map-screen">
-
       <section className="top-area">
-
         <div className="top-controls">
-
           <button
             className="menu-button"
             aria-label="Abrir menu"
@@ -311,13 +428,26 @@ function App() {
             onSearchChange={setSearchTerm}
           />
 
-          <button
+          {/* PERFIL / LOGIN */}
+          {usuario ? (
+            <button
+            type="button"
             className="profile-button"
-            aria-label="Perfil"
-          >
-            4T
-          </button>
-
+            aria-label="Abrir perfil"
+            onClick={() => setTelaAtual("perfil")}
+            >
+              👤
+              </button>
+              ) : (
+              <button
+              type="button"
+              className="profile-button"
+              aria-label="Entrar"
+              onClick={() => setTelaAtual("login")}
+              >
+                👤
+                </button>
+              )}
         </div>
 
         <p className="filter-hint">
@@ -328,11 +458,9 @@ function App() {
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
         />
-
       </section>
 
       <section className="map-area">
-
         <MapView
           points={filteredPoints}
           userLocation={userLocation}
@@ -348,13 +476,12 @@ function App() {
         <UserLocationButton
           onLocationFound={setUserLocation}
         />
-
       </section>
 
       <nav className="bottom-navigation">
-
         <button
           className="bottom-item active"
+          onClick={() => setTelaAtual("mapa")}
         >
           <span>⌖</span>
           <small>Explorar</small>
@@ -365,7 +492,16 @@ function App() {
           <small>Salvos</small>
         </button>
 
-        <button className="bottom-item">
+        <button
+          className="bottom-item"
+          onClick={() => {
+            if (usuario) {
+              setTelaAtual("mapa");
+            } else {
+              setTelaAtual("login");
+            }
+          }}
+        >
           <span>♙</span>
           <small>Perfil</small>
         </button>
@@ -377,9 +513,7 @@ function App() {
           <span>▣</span>
           <small>Agenda</small>
         </button>
-
       </nav>
-
     </main>
   );
 }
