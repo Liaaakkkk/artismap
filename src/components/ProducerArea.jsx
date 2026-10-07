@@ -5,7 +5,7 @@ const emptyProducer = {
   organization: "",
   email: "",
   phone: "",
-  city: ""
+  city: "",
 };
 
 const emptyEvent = {
@@ -15,7 +15,7 @@ const emptyEvent = {
   time: "",
   location: "",
   description: "",
-  contact: ""
+  contact: "",
 };
 
 const categories = [
@@ -26,7 +26,7 @@ const categories = [
   "LITERATURA",
   "CINEMA",
   "CULTURA POPULAR",
-  "OUTROS"
+  "OUTROS",
 ];
 
 function ProducerArea({
@@ -37,30 +37,36 @@ function ProducerArea({
   onUpdateEvent,
   onCancelEvent,
   onApproveEvent,
-  onBack
+  onBack,
 }) {
-  const [producerForm, setProducerForm] = useState(
-    producer || emptyProducer
-  );
+  const [producerForm, setProducerForm] =
+    useState(producer || emptyProducer);
 
-  const [eventForm, setEventForm] = useState(emptyEvent);
+  const [eventForm, setEventForm] =
+    useState(emptyEvent);
 
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] =
+    useState(null);
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] =
+    useState({});
 
-  const [message, setMessage] = useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const [section, setSection] = useState(
-    producer ? "dashboard" : "producer"
-  );
+  const [section, setSection] =
+    useState(
+      producer
+        ? "dashboard"
+        : "producer"
+    );
 
   function handleProducerChange(event) {
     const { name, value } = event.target;
 
     setProducerForm((current) => ({
       ...current,
-      [name]: value
+      [name]: value,
     }));
   }
 
@@ -68,30 +74,40 @@ function ProducerArea({
     const newErrors = {};
 
     if (!producerForm.name.trim()) {
-      newErrors.name = "Informe o nome do produtor.";
+      newErrors.name =
+        "Informe o nome do produtor.";
     }
 
     if (!producerForm.organization.trim()) {
-      newErrors.organization = "Informe o nome da organização.";
+      newErrors.organization =
+        "Informe o nome da organização.";
     }
 
     if (!producerForm.email.trim()) {
-      newErrors.email = "Informe o e-mail.";
-    } else if (!producerForm.email.includes("@")) {
-      newErrors.email = "Informe um e-mail válido.";
+      newErrors.email =
+        "Informe o e-mail.";
+    } else if (
+      !producerForm.email.includes("@")
+    ) {
+      newErrors.email =
+        "Informe um e-mail válido.";
     }
 
     if (!producerForm.phone.trim()) {
-      newErrors.phone = "Informe o telefone.";
+      newErrors.phone =
+        "Informe o telefone.";
     }
 
     if (!producerForm.city.trim()) {
-      newErrors.city = "Informe a cidade.";
+      newErrors.city =
+        "Informe a cidade.";
     }
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
+    return (
+      Object.keys(newErrors).length === 0
+    );
   }
 
   function handleProducerSubmit(event) {
@@ -102,14 +118,20 @@ function ProducerArea({
       return;
     }
 
-    onProducerSave({
+    const producerData = {
       ...producerForm,
-      source: "Cadastro informado pelo próprio produtor",
-      updatedAt: new Date().toISOString()
-    });
+      source:
+        "Cadastro informado pelo próprio produtor",
+      updatedAt: new Date().toISOString(),
+    };
 
+    onProducerSave(producerData);
+
+    setProducerForm(producerData);
     setErrors({});
-    setMessage("Cadastro do produtor salvo com sucesso.");
+    setMessage(
+      "Cadastro do produtor salvo com sucesso."
+    );
     setSection("dashboard");
   }
 
@@ -118,7 +140,7 @@ function ProducerArea({
 
     setEventForm((current) => ({
       ...current,
-      [name]: value
+      [name]: value,
     }));
   }
 
@@ -126,36 +148,45 @@ function ProducerArea({
     const newErrors = {};
 
     if (!eventForm.title.trim()) {
-      newErrors.title = "Informe o título do evento.";
+      newErrors.title =
+        "Informe o título do evento.";
     }
 
     if (!eventForm.category) {
-      newErrors.category = "Selecione uma categoria.";
+      newErrors.category =
+        "Selecione uma categoria.";
     }
 
     if (!eventForm.date) {
-      newErrors.date = "Informe a data.";
+      newErrors.date =
+        "Informe a data.";
     }
 
     if (!eventForm.time) {
-      newErrors.time = "Informe o horário.";
+      newErrors.time =
+        "Informe o horário.";
     }
 
     if (!eventForm.location.trim()) {
-      newErrors.location = "Informe o local.";
+      newErrors.location =
+        "Informe o local.";
     }
 
     if (!eventForm.description.trim()) {
-      newErrors.description = "Informe uma descrição.";
+      newErrors.description =
+        "Informe uma descrição.";
     }
 
     if (!eventForm.contact.trim()) {
-      newErrors.contact = "Informe um contato para o evento.";
+      newErrors.contact =
+        "Informe um contato para o evento.";
     }
 
     setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
+    return (
+      Object.keys(newErrors).length === 0
+    );
   }
 
   function handleEventSubmit(event) {
@@ -168,18 +199,22 @@ function ProducerArea({
 
     const eventData = {
       ...eventForm,
-      category: eventForm.category.toUpperCase(),
+      category:
+        eventForm.category.toUpperCase(),
       status: "Pendente",
-      source: "Informação enviada pelo produtor",
+      source:
+        "Informação enviada pelo produtor",
       producerName: producerForm.name,
-      producerOrganization: producerForm.organization,
-      submittedAt: new Date().toISOString()
+      producerOrganization:
+        producerForm.organization,
+      submittedAt:
+        new Date().toISOString(),
     };
 
     if (editingId) {
       onUpdateEvent({
         ...eventData,
-        id: editingId
+        id: editingId,
       });
 
       setMessage(
@@ -188,7 +223,7 @@ function ProducerArea({
     } else {
       onAddEvent({
         ...eventData,
-        id: Date.now()
+        id: Date.now(),
       });
 
       setMessage(
@@ -209,8 +244,9 @@ function ProducerArea({
       date: event.date || "",
       time: event.time || "",
       location: event.location || "",
-      description: event.description || "",
-      contact: event.contact || ""
+      description:
+        event.description || "",
+      contact: event.contact || "",
     });
 
     setEditingId(event.id);
@@ -221,10 +257,12 @@ function ProducerArea({
 
   function handleCancel(event) {
     const confirmed = window.confirm(
-      "Deseja realmente informar o cancelamento deste evento?"
+      "Deseja realmente cancelar este evento?"
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     onCancelEvent(event.id);
 
@@ -257,16 +295,20 @@ function ProducerArea({
     <main className="producer-area">
       <header className="producer-header">
         <button
+          type="button"
           className="back-button"
           onClick={onBack}
-          aria-label="Voltar para a agenda"
+          aria-label="Voltar"
         >
           ‹
         </button>
 
         <div>
           <h1>Área do produtor</h1>
-          <p>Cadastro e participação cultural</p>
+
+          <p>
+            Cadastro e participação cultural
+          </p>
         </div>
       </header>
 
@@ -280,26 +322,37 @@ function ProducerArea({
         {section === "producer" && (
           <form
             className="producer-card"
-            onSubmit={handleProducerSubmit}
+            onSubmit={
+              handleProducerSubmit
+            }
           >
             <div className="producer-card-header">
               <span>ETAPA 1</span>
-              <h2>Cadastro do produtor</h2>
+
+              <h2>
+                Cadastro do produtor
+              </h2>
+
               <p>
-                Informe os dados de quem é responsável pelas
-                informações dos eventos.
+                Informe os dados de quem é
+                responsável pelas informações
+                dos eventos.
               </p>
             </div>
 
             <label>
               Nome completo
+
               <input
                 type="text"
                 name="name"
                 value={producerForm.name}
-                onChange={handleProducerChange}
+                onChange={
+                  handleProducerChange
+                }
                 placeholder="Ex.: Ana Carolina Souza"
               />
+
               {errors.name && (
                 <small className="producer-error">
                   {errors.name}
@@ -309,13 +362,19 @@ function ProducerArea({
 
             <label>
               Organização ou coletivo
+
               <input
                 type="text"
                 name="organization"
-                value={producerForm.organization}
-                onChange={handleProducerChange}
+                value={
+                  producerForm.organization
+                }
+                onChange={
+                  handleProducerChange
+                }
                 placeholder="Ex.: Coletivo Arte Viva"
               />
+
               {errors.organization && (
                 <small className="producer-error">
                   {errors.organization}
@@ -325,13 +384,17 @@ function ProducerArea({
 
             <label>
               E-mail
+
               <input
                 type="email"
                 name="email"
                 value={producerForm.email}
-                onChange={handleProducerChange}
+                onChange={
+                  handleProducerChange
+                }
                 placeholder="produtor@email.com"
               />
+
               {errors.email && (
                 <small className="producer-error">
                   {errors.email}
@@ -341,13 +404,17 @@ function ProducerArea({
 
             <label>
               Telefone
+
               <input
                 type="tel"
                 name="phone"
                 value={producerForm.phone}
-                onChange={handleProducerChange}
+                onChange={
+                  handleProducerChange
+                }
                 placeholder="(85) 99999-9999"
               />
+
               {errors.phone && (
                 <small className="producer-error">
                   {errors.phone}
@@ -357,13 +424,17 @@ function ProducerArea({
 
             <label>
               Cidade
+
               <input
                 type="text"
                 name="city"
                 value={producerForm.city}
-                onChange={handleProducerChange}
+                onChange={
+                  handleProducerChange
+                }
                 placeholder="Fortaleza"
               />
+
               {errors.city && (
                 <small className="producer-error">
                   {errors.city}
@@ -372,9 +443,13 @@ function ProducerArea({
             </label>
 
             <div className="producer-source">
-              <strong>Fonte da informação</strong>
+              <strong>
+                Fonte da informação
+              </strong>
+
               <span>
-                Cadastro informado pelo próprio produtor
+                Cadastro informado pelo próprio
+                produtor
               </span>
             </div>
 
@@ -390,13 +465,24 @@ function ProducerArea({
         {section === "dashboard" && (
           <>
             <section className="producer-welcome">
-              <span>PRODUTOR CADASTRADO</span>
-              <h2>{producerForm.name}</h2>
-              <p>{producerForm.organization}</p>
+              <span>
+                PRODUTOR CADASTRADO
+              </span>
+
+              <h2>
+                {producerForm.name}
+              </h2>
+
+              <p>
+                {producerForm.organization}
+              </p>
 
               <button
+                type="button"
                 className="producer-secondary-button"
-                onClick={() => setSection("producer")}
+                onClick={() =>
+                  setSection("producer")
+                }
               >
                 Editar cadastro
               </button>
@@ -404,11 +490,13 @@ function ProducerArea({
 
             <div className="producer-actions">
               <button
+                type="button"
                 className="producer-primary-button"
                 onClick={() => {
                   setEditingId(null);
                   setEventForm(emptyEvent);
                   setErrors({});
+                  setMessage("");
                   setSection("event");
                 }}
               >
@@ -418,18 +506,26 @@ function ProducerArea({
 
             <section className="producer-card">
               <div className="producer-card-header">
-                <span>MEUS EVENTOS</span>
-                <h2>Eventos enviados</h2>
+                <span>
+                  MEUS EVENTOS
+                </span>
+
+                <h2>
+                  Eventos enviados
+                </h2>
+
                 <p>
-                  Acompanhe o estado das informações enviadas
-                  para a Agenda.
+                  Acompanhe o estado das
+                  informações enviadas para a
+                  Agenda.
                 </p>
               </div>
 
               {events.length === 0 ? (
                 <div className="producer-empty">
                   <p>
-                    Você ainda não cadastrou nenhum evento.
+                    Você ainda não cadastrou
+                    nenhum evento.
                   </p>
                 </div>
               ) : (
@@ -453,34 +549,45 @@ function ProducerArea({
                         </strong>
                       </div>
 
-                      <h3>{event.title}</h3>
+                      <h3>
+                        {event.title}
+                      </h3>
 
                       <p>
                         📍 {event.location}
                       </p>
 
                       <p>
-                        ◉ {event.date} às {event.time}
+                        ◉ {event.date} às{" "}
+                        {event.time}
                       </p>
 
                       <small>
-                        Fonte: {event.source}
+                        Fonte:{" "}
+                        {event.source}
                       </small>
 
                       <div className="producer-event-actions">
-                        {event.status !== "Cancelado" && (
+                        {event.status !==
+                          "Cancelado" && (
                           <>
                             <button
+                              type="button"
                               onClick={() =>
-                                handleEdit(event)
+                                handleEdit(
+                                  event
+                                )
                               }
                             >
                               Editar
                             </button>
 
                             <button
+                              type="button"
                               onClick={() =>
-                                handleCancel(event)
+                                handleCancel(
+                                  event
+                                )
                               }
                             >
                               Cancelar
@@ -488,11 +595,15 @@ function ProducerArea({
                           </>
                         )}
 
-                        {event.status === "Pendente" && (
+                        {event.status ===
+                          "Pendente" && (
                           <button
+                            type="button"
                             className="moderation-button"
                             onClick={() =>
-                              handleApprove(event)
+                              handleApprove(
+                                event
+                              )
                             }
                           >
                             Simular aprovação
@@ -506,12 +617,17 @@ function ProducerArea({
             </section>
 
             <div className="producer-demo-note">
-              <strong>Demonstração de moderação</strong>
+              <strong>
+                Demonstração de moderação
+              </strong>
+
               <p>
-                O botão "Simular aprovação" representa a ação
-                de um moderador. Em uma próxima etapa, essa
-                operação deverá ser protegida por autenticação
-                e permissão de moderador.
+                O botão "Simular aprovação"
+                representa a ação de um
+                moderador. Em uma próxima etapa,
+                essa operação deverá ser protegida
+                por autenticação e permissão de
+                moderador.
               </p>
             </div>
           </>
@@ -524,26 +640,32 @@ function ProducerArea({
           >
             <div className="producer-card-header">
               <span>ETAPA 2</span>
+
               <h2>
                 {editingId
                   ? "Editar evento"
                   : "Cadastrar evento"}
               </h2>
+
               <p>
-                Preencha as informações que serão analisadas
-                antes da publicação.
+                Preencha as informações que serão
+                analisadas antes da publicação.
               </p>
             </div>
 
             <label>
               Nome do evento
+
               <input
                 type="text"
                 name="title"
                 value={eventForm.title}
-                onChange={handleEventChange}
+                onChange={
+                  handleEventChange
+                }
                 placeholder="Ex.: Festival de Música"
               />
+
               {errors.title && (
                 <small className="producer-error">
                   {errors.title}
@@ -553,23 +675,28 @@ function ProducerArea({
 
             <label>
               Categoria
+
               <select
                 name="category"
                 value={eventForm.category}
-                onChange={handleEventChange}
+                onChange={
+                  handleEventChange
+                }
               >
                 <option value="">
                   Selecione uma categoria
                 </option>
 
-                {categories.map((category) => (
-                  <option
-                    key={category}
-                    value={category}
-                  >
-                    {category}
-                  </option>
-                ))}
+                {categories.map(
+                  (category) => (
+                    <option
+                      key={category}
+                      value={category}
+                    >
+                      {category}
+                    </option>
+                  )
+                )}
               </select>
 
               {errors.category && (
@@ -582,11 +709,14 @@ function ProducerArea({
             <div className="producer-form-row">
               <label>
                 Data
+
                 <input
                   type="date"
                   name="date"
                   value={eventForm.date}
-                  onChange={handleEventChange}
+                  onChange={
+                    handleEventChange
+                  }
                 />
 
                 {errors.date && (
@@ -598,11 +728,14 @@ function ProducerArea({
 
               <label>
                 Horário
+
                 <input
                   type="time"
                   name="time"
                   value={eventForm.time}
-                  onChange={handleEventChange}
+                  onChange={
+                    handleEventChange
+                  }
                 />
 
                 {errors.time && (
@@ -615,11 +748,14 @@ function ProducerArea({
 
             <label>
               Local
+
               <input
                 type="text"
                 name="location"
                 value={eventForm.location}
-                onChange={handleEventChange}
+                onChange={
+                  handleEventChange
+                }
                 placeholder="Ex.: Centro Cultural"
               />
 
@@ -632,10 +768,15 @@ function ProducerArea({
 
             <label>
               Descrição
+
               <textarea
                 name="description"
-                value={eventForm.description}
-                onChange={handleEventChange}
+                value={
+                  eventForm.description
+                }
+                onChange={
+                  handleEventChange
+                }
                 placeholder="Descreva o evento, programação e público."
                 rows="5"
               />
@@ -649,11 +790,14 @@ function ProducerArea({
 
             <label>
               Contato do evento
+
               <input
                 type="text"
                 name="contact"
                 value={eventForm.contact}
-                onChange={handleEventChange}
+                onChange={
+                  handleEventChange
+                }
                 placeholder="E-mail ou telefone para informações"
               />
 
@@ -665,7 +809,10 @@ function ProducerArea({
             </label>
 
             <div className="producer-source">
-              <strong>Fonte da informação</strong>
+              <strong>
+                Fonte da informação
+              </strong>
+
               <span>
                 Informação enviada pelo produtor
               </span>
@@ -680,6 +827,7 @@ function ProducerArea({
                   setEditingId(null);
                   setEventForm(emptyEvent);
                   setErrors({});
+                  setMessage("");
                 }}
               >
                 Voltar
@@ -699,14 +847,20 @@ function ProducerArea({
       </section>
 
       <nav className="bottom-navigation producer-navigation">
-        <button onClick={onBack}>
+        <button
+          type="button"
+          onClick={onBack}
+        >
           <span>⌂</span>
-          <small>Agenda</small>
+          <small>Explorar</small>
         </button>
 
         <button
+          type="button"
           className="producer-nav-active"
-          onClick={() => setSection("dashboard")}
+          onClick={() =>
+            setSection("dashboard")
+          }
         >
           <span>♙</span>
           <small>Produtor</small>

@@ -1,19 +1,27 @@
 import { useState } from "react";
-
 import { cadastrarUsuario } from "../utils/auth";
 
 function Cadastro({ onCadastro, onVoltar }) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] =
+    useState("");
 
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] =
+  const [tipoConta, setTipoConta] =
+    useState("usuario");
+
+  const [mostrarSenha, setMostrarSenha] =
     useState(false);
 
+  const [
+    mostrarConfirmarSenha,
+    setMostrarConfirmarSenha,
+  ] = useState(false);
+
   const [erro, setErro] = useState("");
-  const [carregando, setCarregando] = useState(false);
+  const [carregando, setCarregando] =
+    useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -31,7 +39,9 @@ function Cadastro({ onCadastro, onVoltar }) {
     }
 
     if (senha.length < 6) {
-      setErro("A senha deve ter pelo menos 6 caracteres.");
+      setErro(
+        "A senha deve ter pelo menos 6 caracteres."
+      );
       return;
     }
 
@@ -46,12 +56,16 @@ function Cadastro({ onCadastro, onVoltar }) {
       const usuario = await cadastrarUsuario(
         nome,
         email,
-        senha
+        senha,
+        tipoConta
       );
 
       onCadastro(usuario);
     } catch (error) {
-      setErro(error.message);
+      setErro(
+        error.message ||
+          "Não foi possível criar a conta."
+      );
     } finally {
       setCarregando(false);
     }
@@ -59,28 +73,48 @@ function Cadastro({ onCadastro, onVoltar }) {
 
   return (
     <div className="login-page">
-      <div className="login-card cadastro-card">
-
-        <button
-          type="button"
-          className="login-back-button"
-          onClick={onVoltar}
-        >
-          ← Voltar
-        </button>
-
+      <div className="login-card">
         <div className="login-header">
-          <h1>ArtisMap</h1>
+          <h1>Criar conta</h1>
 
           <p>
-            Crie sua conta para explorar
-            a cultura de Fortaleza.
+            Faça parte do ArtisMap.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <div className="login-type-selector">
+          <button
+            type="button"
+            className={
+              tipoConta === "usuario"
+                ? "login-type-button active"
+                : "login-type-button"
+            }
+            onClick={() => {
+              setTipoConta("usuario");
+              setErro("");
+            }}
+          >
+            👤 Usuário
+          </button>
 
-          {/* NOME */}
+          <button
+            type="button"
+            className={
+              tipoConta === "produtor"
+                ? "login-type-button active"
+                : "login-type-button"
+            }
+            onClick={() => {
+              setTipoConta("produtor");
+              setErro("");
+            }}
+          >
+            🎭 Produtor
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
           <div className="login-field">
             <label htmlFor="nome">
               Nome
@@ -89,7 +123,7 @@ function Cadastro({ onCadastro, onVoltar }) {
             <input
               id="nome"
               type="text"
-              placeholder="Seu nome"
+              placeholder="Digite seu nome"
               value={nome}
               onChange={(event) =>
                 setNome(event.target.value)
@@ -97,14 +131,13 @@ function Cadastro({ onCadastro, onVoltar }) {
             />
           </div>
 
-          {/* EMAIL */}
           <div className="login-field">
-            <label htmlFor="cadastro-email">
+            <label htmlFor="email">
               E-mail
             </label>
 
             <input
-              id="cadastro-email"
+              id="email"
               type="email"
               placeholder="seuemail@email.com"
               value={email}
@@ -114,15 +147,14 @@ function Cadastro({ onCadastro, onVoltar }) {
             />
           </div>
 
-          {/* SENHA */}
           <div className="login-field">
-            <label htmlFor="cadastro-senha">
+            <label htmlFor="senha">
               Senha
             </label>
 
             <div className="password-container">
               <input
-                id="cadastro-senha"
+                id="senha"
                 type={
                   mostrarSenha
                     ? "text"
@@ -149,15 +181,14 @@ function Cadastro({ onCadastro, onVoltar }) {
             </div>
           </div>
 
-          {/* CONFIRMAR SENHA */}
           <div className="login-field">
-            <label htmlFor="confirmar-senha">
+            <label htmlFor="confirmarSenha">
               Confirmar senha
             </label>
 
             <div className="password-container">
               <input
-                id="confirmar-senha"
+                id="confirmarSenha"
                 type={
                   mostrarConfirmarSenha
                     ? "text"
@@ -188,14 +219,12 @@ function Cadastro({ onCadastro, onVoltar }) {
             </div>
           </div>
 
-          {/* ERRO */}
           {erro && (
             <p className="login-error">
               {erro}
             </p>
           )}
 
-          {/* BOTÃO */}
           <button
             type="submit"
             className="login-button"
@@ -205,7 +234,6 @@ function Cadastro({ onCadastro, onVoltar }) {
               ? "Criando conta..."
               : "Criar conta"}
           </button>
-
         </form>
 
         <p className="login-register">
@@ -215,10 +243,9 @@ function Cadastro({ onCadastro, onVoltar }) {
             type="button"
             onClick={onVoltar}
           >
-            Entrar
+            Voltar para o login
           </button>
         </p>
-
       </div>
     </div>
   );

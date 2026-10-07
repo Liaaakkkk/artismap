@@ -8,24 +8,59 @@ const authRoutes = require("./routes/auth");
 
 const app = express();
 
-app.use(cors());
+/*
+|--------------------------------------------------------------------------
+| Middlewares
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-// Conecta ao MongoDB
+/*
+|--------------------------------------------------------------------------
+| Banco de dados
+|--------------------------------------------------------------------------
+*/
+
 connectDatabase();
 
-// Rotas de autenticação
-app.use("/", authRoutes);
+/*
+|--------------------------------------------------------------------------
+| Rotas
+|--------------------------------------------------------------------------
+*/
 
-// Rota de teste
+app.use("/api/auth", authRoutes);
+
+/*
+|--------------------------------------------------------------------------
+| Rota inicial
+|--------------------------------------------------------------------------
+*/
+
 app.get("/", (req, res) => {
   res.json({
     mensagem: "Backend do ArtisMap funcionando!",
   });
 });
 
+/*
+|--------------------------------------------------------------------------
+| Servidor
+|--------------------------------------------------------------------------
+*/
+
 const PORT = 3001;
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(
+    `Servidor rodando em http://localhost:${PORT}`
+  );
 });
