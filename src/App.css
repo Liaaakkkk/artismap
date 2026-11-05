@@ -1429,3 +1429,57 @@ html, body, #root {
     bottom: 0 !important;
   }
 }
+
+
+/* Agenda: a navegação fica presa ao rodapé, nunca após os cards */
+.agenda-screen {
+  position: relative;
+  min-height: 100dvh;
+  height: 100dvh;
+  padding-bottom: 68px;
+  box-sizing: border-box;
+}
+
+.agenda-screen .events-section {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 18px;
+}
+
+.agenda-screen .bottom-navigation {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  width: 100%;
+  max-width: 430px;
+  height: 68px;
+  transform: translateX(-50%);
+  background: #fff3df;
+}
+
+/* Identidade visual única para todas as barras inferiores */
+.bottom-navigation,
+.explore-navigation,
+.saved-navigation {
+  background: #fff3df !important;
+  border-top: 1px solid rgba(64, 50, 82, 0.10);
+  box-shadow: 0 -4px 16px rgba(57, 45, 70, 0.06);
+}
+
+.bottom-navigation > button,
+.explore-navigation > button,
+.saved-navigation > button {
+  background: transparent;
+  color: #756b7b;
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+
+.bottom-navigation > button.active,
+.explore-navigation > button.active,
+.saved-navigation > button.active {
+  background: #c4e1e6;
+  color: #392d46;
+  border-color: #c4e1e6;
+}
