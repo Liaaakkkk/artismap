@@ -56,6 +56,8 @@ function ExploreEvents({
   onOpenAgenda,
   onOpenProfile,
   fotoPerfil,
+  savedEvents = [],
+  onToggleSaved,
 }) {
   const [busca, setBusca] = useState("");
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
@@ -198,7 +200,18 @@ function ExploreEvents({
                     <span className="explore-available">Disponível</span>
                   </div>
 
-                  <h3>{evento.title}</h3>
+                  <div className="explore-event-title-row">
+                    <h3>{evento.title}</h3>
+                    <button
+                      type="button"
+                      className={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "explore-save-button is-saved" : "explore-save-button"}
+                      onClick={() => onToggleSaved?.(evento)}
+                      aria-label={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "Remover dos salvos" : "Salvar nos favoritos"}
+                      title={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "Remover dos salvos" : "Salvar evento"}
+                    >
+                      {savedEvents.some((item) => String(item.id) === String(evento.id)) ? "♥" : "♡"}
+                    </button>
+                  </div>
                   {evento.description && <p className="explore-description">{evento.description}</p>}
 
                   <div className="explore-event-info">
