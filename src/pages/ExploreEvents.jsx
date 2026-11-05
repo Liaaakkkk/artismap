@@ -61,6 +61,7 @@ function ExploreEvents({
   onToggleSaved,
 }) {
   const [busca, setBusca] = useState("");
+  const [eventoSelecionado, setEventoSelecionado] = useState(null);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
   const [eventosDoCatalogo] = useState(lerEventosDoCatalogo);
 
@@ -187,7 +188,7 @@ function ExploreEvents({
         ) : (
           <div className="explore-event-list">
             {eventosFiltrados.map((evento) => (
-              <article className="explore-event-card" key={evento.id}>
+              <article className="explore-event-card explore-event-card-clickable" key={evento.id} role="button" tabIndex={0} onClick={() => setEventoSelecionado(evento)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setEventoSelecionado(evento); } }}>
                 {evento.imagem && (
                   <img
                     className="explore-event-image"
@@ -206,7 +207,7 @@ function ExploreEvents({
                     <button
                       type="button"
                       className={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "explore-save-button is-saved" : "explore-save-button"}
-                      onClick={() => onToggleSaved?.(evento)}
+                      onClick={(event) => { event.stopPropagation(); onToggleSaved?.(evento); }}
                       aria-label={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "Remover dos salvos" : "Salvar nos favoritos"}
                       title={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "Remover dos salvos" : "Salvar evento"}
                     >
@@ -242,6 +243,29 @@ function ExploreEvents({
           </div>
         )}
       </section>
+
+      {eventoSelecionado && (
+        <div className="explore-modal-overlay" onClick={() => setEventoSelecionado(null)}>
+          <section className="explore-event-modal" role="dialog" aria-modal="true" aria-labelledby="explore-modal-title" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="explore-modal-close" aria-label="Fechar detalhes" onClick={() => setEventoSelecionado(null)}>×</button>
+            {eventoSelecionado.imagem && <img className="explore-modal-image" src={eventoSelecionado.imagem} alt={eventoSelecionado.title} />}
+            <span className="explore-category">{eventoSelecionado.category}</span>
+            <h2 id="explore-modal-title">{eventoSelecionado.title}</h2>
+            {eventoSelecionado.description && <p className="explore-modal-description">{eventoSelecionado.description}</p>}
+            <div className="explore-modal-info">
+              <p><strong>Data:</strong> {formatarData(eventoSelecionado.date)}</p>
+              {eventoSelecionado.time && <p><strong>Horário:</strong> {eventoSelecionado.time}</p>}
+              {eventoSelecionado.location && <p><strong>Local:</strong> {eventoSelecionado.location}</p>}
+              {eventoSelecionado.address && <p><strong>Endereço:</strong> {eventoSelecionado.address}</p>}
+              {eventoSelecionado.city && <p><strong>Cidade:</strong> {eventoSelecionado.city}</p>}
+              {eventoSelecionado.preco && <p><strong>Entrada:</strong> {eventoSelecionado.preco}</p>}
+              {eventoSelecionado.organizador && <p><strong>Organização:</strong> {eventoSelecionado.organizador}</p>}
+            </div>
+            {eventoSelecionado.link && <a className="explore-event-link" href={eventoSelecionado.link} target="_blank" rel="noreferrer">Acessar página do evento ↗</a>}
+            <button type="button" className="explore-modal-done" onClick={() => setEventoSelecionado(null)}>Fechar detalhes</button>
+          </section>
+        </div>
+      )}
 
       <nav className="bottom-navigation explore-navigation">
         <button type="button" className="active" aria-current="page">
