@@ -357,3 +357,21 @@ button {
   background: #d28b8b;
   color: #392d46;
 }
+
+
+.catalogo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.catalogo-header > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.catalog-profile-button {
+  flex-shrink: 0;
+  padding: 0;
+  overflow: hidden;
+}
