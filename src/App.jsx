@@ -6,6 +6,7 @@ import ProducerArea from "./components/ProducerArea";
 import CatalogoEventos from "./pages/CatalogoEventos";
 import ExploreEvents from "./pages/ExploreEvents";
 import UserProfile from "./pages/UserProfile";
+import SavedEvents from "./pages/SavedEvents";
 
 import SearchBar from "./components/SearchBar";
 import CategoryFilters from "./components/CategoryFilters";
@@ -213,6 +214,35 @@ function App() {
       return initialEvents;
     }
   });
+
+  const [savedEvents, setSavedEvents] = useState(() => {
+    try {
+      const email = obterUsuario()?.email || "visitante";
+      return JSON.parse(localStorage.getItem(`artismap-favoritos-${email}`) || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  function persistirSalvos(lista) {
+    setSavedEvents(lista);
+    const email = usuario?.email || "visitante";
+    localStorage.setItem(`artismap-favoritos-${email}`, JSON.stringify(lista));
+  }
+
+  function toggleSavedEvent(evento) {
+    const id = String(evento.id);
+    const jaSalvo = savedEvents.some((item) => String(item.id) === id);
+    persistirSalvos(
+      jaSalvo
+        ? savedEvents.filter((item) => String(item.id) !== id)
+        : [...savedEvents, evento]
+    );
+  }
+
+  function removerEventoSalvo(eventId) {
+    persistirSalvos(savedEvents.filter((item) => String(item.id) !== String(eventId)));
+  }
 
   /*
   |--------------------------------------------------------------------------
@@ -645,6 +675,19 @@ function App() {
     );
   }
 
+  if (telaAtual === "salvos") {
+    return (
+      <SavedEvents
+        events={savedEvents}
+        fotoPerfil={usuario?.fotoPerfil}
+        onRemove={removerEventoSalvo}
+        onOpenExplore={() => setTelaAtual("explorar")}
+        onOpenMap={() => setTelaAtual("mapa")}
+        onOpenProfile={() => setTelaAtual("perfil")}
+      />
+    );
+  }
+
   /*
   |--------------------------------------------------------------------------
   | PERFIL
@@ -810,6 +853,8 @@ function App() {
     return (
       <ExploreEvents
         events={events}
+        savedEvents={savedEvents}
+        onToggleSaved={toggleSavedEvent}
         fotoPerfil={usuario?.fotoPerfil}
         onOpenMap={() => setTelaAtual("mapa")}
         onOpenAgenda={() => setTelaAtual("agenda")}
@@ -905,7 +950,10 @@ function App() {
           <small>Explorar</small>
         </button>
 
-        <button type="button">
+        <button
+          type="button"
+          onClick={() => setTelaAtual("salvos")}
+        >
           <span>♡</span>
           <small>Salvos</small>
         </button>
