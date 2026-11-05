@@ -1378,3 +1378,28 @@ body {
     padding-top: 18px;
   }
 }
+
+
+/* Ajuste fino: separar busca e filtros sem aumentar a navbar */
+.top-area {
+  padding-bottom: 10px;
+}
+
+.filters-container {
+  margin-top: 12px;
+}
+
+/* O espaço deve ficar entre busca e filtros, não acima do mapa */
+.app > .map-container {
+  padding-top: 0;
+}
+
+@media (max-width: 480px) {
+  .top-area {
+    padding-bottom: 10px;
+  }
+
+  .app > .map-container {
+    padding-top: 0;
+  }
+}
