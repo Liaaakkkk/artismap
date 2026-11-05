@@ -69,6 +69,7 @@ function obterStatusEvento(evento) {
 function CatalogoEventos({
   usuario,
   onVoltar,
+  onOpenProfile,
 }) {
   const isProdutor =
     usuario?.tipo === "produtor";
@@ -288,6 +289,16 @@ function CatalogoEventos({
             em Fortaleza.
           </p>
         </div>
+        <button
+          type="button"
+          className="profile-button catalog-profile-button"
+          aria-label="Abrir perfil"
+          onClick={onOpenProfile}
+        >
+          {usuario?.fotoPerfil ? (
+            <img src={usuario.fotoPerfil} alt="Foto de perfil" />
+          ) : "👤"}
+        </button>
       </header>
 
       <section className="catalogo-content">
