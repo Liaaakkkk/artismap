@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema(
       enum: ["usuario", "produtor"],
       default: "usuario",
     },
+
+    fotoPerfil: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
