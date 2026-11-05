@@ -790,15 +790,27 @@ function App() {
             </p>
           </div>
 
-          <button
-            type="button"
-            className="catalog-button"
-            onClick={() =>
-              setTelaAtual("catalogo")
-            }
-          >
-            Catálogo
-          </button>
+          <div className="top-bar-actions">
+            <button
+              type="button"
+              className="catalog-button"
+              onClick={() =>
+                setTelaAtual("catalogo")
+              }
+            >
+              Catálogo
+            </button>
+            <button
+              type="button"
+              className="profile-button"
+              aria-label="Abrir perfil"
+              onClick={() => setTelaAtual("perfil")}
+            >
+              {usuario?.fotoPerfil ? (
+                <img src={usuario.fotoPerfil} alt="Foto de perfil" />
+              ) : "👤"}
+            </button>
+          </div>
         </header>
 
         <Calendar
@@ -879,6 +891,7 @@ function App() {
     return (
       <CatalogoEventos
         usuario={usuario}
+        onOpenProfile={() => setTelaAtual("perfil")}
         onVoltar={() =>
           setTelaAtual("agenda")
         }
@@ -896,6 +909,7 @@ function App() {
     return (
       <ExploreEvents
         events={events}
+        fotoPerfil={usuario?.fotoPerfil}
         onOpenMap={() => setTelaAtual("mapa")}
         onOpenAgenda={() => setTelaAtual("agenda")}
         onOpenProfile={() => setTelaAtual("perfil")}
@@ -937,7 +951,11 @@ function App() {
               setTelaAtual("perfil")
             }
           >
-            👤
+            {usuario?.fotoPerfil ? (
+              <img src={usuario.fotoPerfil} alt="Foto de perfil" />
+            ) : (
+              "👤"
+            )}
           </button>
         </div>
 
