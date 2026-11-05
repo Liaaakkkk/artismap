@@ -1325,3 +1325,19 @@ body {
     margin: 0 auto;
   }
 }
+
+
+/* Barra do produtor sempre junto à borda inferior da tela */
+.producer-content {
+  padding-bottom: 100px;
+}
+
+.producer-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  width: 100%;
+  max-width: 430px;
+  transform: translateX(-50%);
+  margin-top: 0;
+}
