@@ -111,7 +111,7 @@ function App() {
       return "produtor";
     }
 
-    return "mapa";
+    return "explorar";
   });
 
   /*
@@ -979,7 +979,7 @@ function App() {
           type="button"
           className="active"
           onClick={() =>
-            setTelaAtual("mapa")
+            setTelaAtual("explorar")
           }
         >
           <span>⌂</span>
