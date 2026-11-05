@@ -54,6 +54,7 @@ function ExploreEvents({
   events = [],
   onOpenMap,
   onOpenAgenda,
+  onOpenSaved,
   onOpenProfile,
   fotoPerfil,
   savedEvents = [],
@@ -251,7 +252,7 @@ function ExploreEvents({
           <span>⌖</span>
           <small>Mapa</small>
         </button>
-        <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("artismap-open-saved"))}>
+        <button type="button" onClick={onOpenSaved}>
           <span>♡</span>
           <small>Salvos</small>
         </button>
