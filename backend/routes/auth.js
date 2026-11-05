@@ -63,6 +63,7 @@ router.post("/cadastro", async (req, res) => {
         nome: novoUsuario.nome,
         email: novoUsuario.email,
         tipo: novoUsuario.tipo,
+        fotoPerfil: novoUsuario.fotoPerfil || "",
       },
     });
   } catch (error) {
@@ -150,6 +151,7 @@ router.post("/login", async (req, res) => {
         nome: usuario.nome,
         email: usuario.email,
         tipo: usuario.tipo,
+        fotoPerfil: usuario.fotoPerfil || "",
       },
     });
   } catch (error) {
@@ -157,6 +159,67 @@ router.post("/login", async (req, res) => {
 
     return res.status(500).json({
       mensagem: "Erro interno ao realizar login.",
+    });
+  }
+});
+
+
+// Atualiza a foto de perfil de uma conta.
+router.put("/:id/foto", async (req, res) => {
+  try {
+    const { fotoPerfil } = req.body;
+
+    if (typeof fotoPerfil !== "string") {
+      return res.status(400).json({
+        mensagem: "Envie uma imagem válida.",
+      });
+    }
+
+    const formatoPermitido =
+      /^data:image\/(jpeg|png|webp);base64,/i;
+
+    if (!formatoPermitido.test(fotoPerfil)) {
+      return res.status(400).json({
+        mensagem: "Use uma imagem JPG, PNG ou WEBP.",
+      });
+    }
+
+    const base64 = fotoPerfil.split(",")[1] || "";
+    const tamanhoEmBytes = Buffer.from(base64, "base64").length;
+
+    if (!tamanhoEmBytes || tamanhoEmBytes > 2 * 1024 * 1024) {
+      return res.status(413).json({
+        mensagem: "A imagem deve ter no máximo 2 MB.",
+      });
+    }
+
+    const usuario = await User.findByIdAndUpdate(
+      req.params.id,
+      { fotoPerfil },
+      { new: true, runValidators: true }
+    );
+
+    if (!usuario) {
+      return res.status(404).json({
+        mensagem: "Conta não encontrada.",
+      });
+    }
+
+    return res.json({
+      mensagem: "Foto de perfil atualizada.",
+      usuario: {
+        id: usuario._id,
+        nome: usuario.nome,
+        email: usuario.email,
+        tipo: usuario.tipo,
+        fotoPerfil: usuario.fotoPerfil || "",
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar foto:", error);
+
+    return res.status(500).json({
+      mensagem: "Não foi possível atualizar a foto.",
     });
   }
 });
