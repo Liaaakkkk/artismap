@@ -5,6 +5,7 @@ import EventCard from "./components/EventCard";
 import ProducerArea from "./components/ProducerArea";
 import CatalogoEventos from "./pages/CatalogoEventos";
 import ExploreEvents from "./pages/ExploreEvents";
+import UserProfile from "./pages/UserProfile";
 
 import SearchBar from "./components/SearchBar";
 import CategoryFilters from "./components/CategoryFilters";
@@ -652,112 +653,12 @@ function App() {
 
   if (telaAtual === "perfil") {
     return (
-      <main className="app profile-screen">
-        <section className="profile-page">
-          <button
-            type="button"
-            className="profile-back-button"
-            onClick={() =>
-              setTelaAtual("explorar")
-            }
-          >
-            ← Voltar
-          </button>
-
-          <div className="profile-avatar" style={{
-            width: "112px",
-            height: "112px",
-            borderRadius: "50%",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 16px",
-            background: "#eee",
-          }}>
-            {usuario?.fotoPerfil ? (
-              <img
-                src={usuario.fotoPerfil}
-                alt="Foto de perfil"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              "👤"
-            )}
-          </div>
-
-          <label
-            htmlFor="foto-perfil-usuario"
-            className="producer-secondary-button"
-            style={{
-              display: "inline-block",
-              cursor: "pointer",
-              marginBottom: "18px",
-            }}
-          >
-            Alterar foto
-          </label>
-          <input
-            id="foto-perfil-usuario"
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            style={{ display: "none" }}
-            onChange={async (event) => {
-              const arquivo = event.target.files?.[0];
-              if (!arquivo) return;
-
-              try {
-                await handlePhotoChange(arquivo);
-                alert("Foto de perfil atualizada!");
-              } catch (error) {
-                alert(error.message);
-              } finally {
-                event.target.value = "";
-              }
-            }}
-          />
-
-          <h1>Meu perfil</h1>
-
-          <p className="profile-email-page">
-            {usuario?.email}
-          </p>
-
-          <p>
-            Tipo de conta:{" "}
-            <strong>
-              {usuario?.tipo === "produtor"
-                ? "Produtor"
-                : "Usuário"}
-            </strong>
-          </p>
-
-          {usuario?.tipo ===
-            "produtor" && (
-            <button
-              type="button"
-              className="producer-profile-button"
-              onClick={() =>
-                setTelaAtual("produtor")
-              }
-            >
-              Área do produtor
-            </button>
-          )}
-
-          <button
-            type="button"
-            className="logout-button"
-            onClick={handleLogout}
-          >
-            Sair da conta
-          </button>
-        </section>
-      </main>
+      <UserProfile
+        usuario={usuario}
+        onPhotoChange={handlePhotoChange}
+        onBack={() => setTelaAtual("explorar")}
+        onLogout={handleLogout}
+      />
     );
   }
 
