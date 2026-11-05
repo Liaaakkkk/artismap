@@ -1341,3 +1341,60 @@ body {
   transform: translateX(-50%);
   margin-top: 0;
 }
+
+
+/* CORREÇÃO DEFINITIVA: área do produtor com navegação no rodapé */
+.producer-area {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+  background: #efeaff;
+}
+
+.producer-header {
+  flex: 0 0 auto;
+  background: #564787 !important;
+}
+
+.producer-header h1,
+.producer-header p {
+  color: #fff3df !important;
+}
+
+.producer-header .back-button {
+  background: #fff3df !important;
+  color: #392d46 !important;
+}
+
+.producer-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  padding: 18px 16px 24px;
+  overscroll-behavior: contain;
+}
+
+.producer-navigation {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: 100%;
+  max-width: none;
+  height: 68px;
+  min-height: 68px;
+  flex: 0 0 68px;
+  margin: 0;
+  z-index: 1000;
+  background: #fff3df;
+  border-top: 1px solid rgba(64, 50, 82, 0.1);
+}
