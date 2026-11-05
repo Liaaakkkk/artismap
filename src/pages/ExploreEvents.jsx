@@ -55,6 +55,7 @@ function ExploreEvents({
   onOpenMap,
   onOpenAgenda,
   onOpenProfile,
+  fotoPerfil,
 }) {
   const [busca, setBusca] = useState("");
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
@@ -123,7 +124,11 @@ function ExploreEvents({
             onClick={onOpenProfile}
             aria-label="Abrir perfil"
           >
-            ♙
+            {fotoPerfil ? (
+              <img src={fotoPerfil} alt="Foto de perfil" />
+            ) : (
+              "👤"
+            )}
           </button>
         </div>
 
