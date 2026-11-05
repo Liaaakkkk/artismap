@@ -1403,3 +1403,29 @@ body {
     padding-top: 0;
   }
 }
+
+/* Navbar sempre encostada à borda inferior do viewport */
+html, body, #root {
+  min-height: 100%;
+}
+
+.app {
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+.bottom-navigation {
+  bottom: 0;
+}
+
+.explore-navigation,
+.saved-navigation {
+  bottom: 0 !important;
+}
+
+@media (min-width: 768px) {
+  .explore-navigation,
+  .saved-navigation {
+    bottom: 0 !important;
+  }
+}
