@@ -1258,3 +1258,65 @@ body {
     margin: 0 auto;
   }
 }
+
+
+/* =========================================
+   BOTÕES DA NAVEGAÇÃO INFERIOR
+   Explorar • Salvos • Perfil
+========================================= */
+
+.bottom-navigation > button {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  margin: 0 10px;
+  padding: 7px 12px;
+  border: 1px solid rgba(64, 50, 82, 0.12);
+  border-radius: 999px;
+  background: #fff0dc;
+  color: #51445f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bottom-navigation > button span {
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.bottom-navigation > button small {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.bottom-navigation > button:hover {
+  border-color: #c4e1e6;
+  background: #e3f0ef;
+  color: #392d46;
+  box-shadow: 0 2px 8px rgba(57, 45, 70, 0.08);
+}
+
+.bottom-navigation > button:active {
+  transform: scale(0.96);
+}
+
+.bottom-navigation > button.active {
+  border-color: #c4e1e6;
+  background: #c4e1e6;
+  color: #392d46;
+  box-shadow: 0 2px 8px rgba(57, 45, 70, 0.08);
+}
+
+.bottom-navigation > button:focus-visible {
+  outline: 2px solid #8bbdc5;
+  outline-offset: 3px;
+}
