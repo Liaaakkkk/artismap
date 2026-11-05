@@ -723,7 +723,7 @@ function App() {
 
   if (telaAtual === "agenda") {
     return (
-      <main className="app">
+      <main className="app agenda-screen">
         <header className="top-bar">
           <button
             type="button"
@@ -816,7 +816,10 @@ function App() {
             <small>Explorar</small>
           </button>
 
-          <button type="button">
+          <button
+            type="button"
+            onClick={() => setTelaAtual("salvos")}
+          >
             <span>♡</span>
             <small>Salvos</small>
           </button>
