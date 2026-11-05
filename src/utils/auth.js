@@ -128,3 +128,53 @@ export function logoutUsuario() {
 export function usuarioEstaLogado() {
   return localStorage.getItem("usuario") !== null;
 }
+
+// Atualiza a foto de perfil no MongoDB.
+export async function atualizarFotoPerfil(usuarioId, arquivo) {
+  if (!arquivo) {
+    throw new Error("Selecione uma imagem.");
+  }
+
+  const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
+
+  if (!tiposPermitidos.includes(arquivo.type)) {
+    throw new Error("Escolha uma imagem JPG, PNG ou WEBP.");
+  }
+
+  if (arquivo.size > 2 * 1024 * 1024) {
+    throw new Error("A imagem deve ter no máximo 2 MB.");
+  }
+
+  const fotoPerfil = await new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+
+    leitor.onload = () => resolve(leitor.result);
+    leitor.onerror = () => reject(
+      new Error("Não foi possível ler a imagem.")
+    );
+
+    leitor.readAsDataURL(arquivo);
+  });
+
+  const resposta = await fetch(`${API_URL}/${usuarioId}/foto`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fotoPerfil }),
+  });
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(
+      dados.mensagem || "Não foi possível atualizar a foto."
+    );
+  }
+
+  const usuarioAtualizado = dados.usuario;
+
+  localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+
+  return usuarioAtualizado;
+}
