@@ -315,3 +315,124 @@
     bottom: 20px;
   }
 }
+
+
+/* =========================================
+   BOTÕES — VISUAL ARREDONDADO ARTISMAP
+========================================= */
+
+.explore-filters button {
+  min-height: 34px;
+  padding: 8px 15px;
+  border: 1px solid rgba(196, 225, 230, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 240, 220, 0.08);
+  color: #fff0dc;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.explore-filters button:hover {
+  background: rgba(196, 225, 230, 0.18);
+  transform: translateY(-1px);
+}
+
+.explore-filters button.selected {
+  border-color: #c4e1e6;
+  border-radius: 999px;
+  background: #c4e1e6;
+  color: #392d46;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.12);
+}
+
+.explore-profile-button {
+  border: none;
+  border-radius: 50%;
+  background: #c4e1e6;
+  color: #392d46;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.explore-profile-button:hover {
+  background: #d8edf0;
+  transform: translateY(-2px);
+}
+
+.explore-empty button {
+  min-height: 38px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 999px;
+  background: #392d46;
+  color: #fff0dc;
+  font-size: 11px;
+  font-weight: 700;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.explore-empty button:hover {
+  background: #51445a;
+  transform: translateY(-1px);
+}
+
+/* Menu inferior em formato de cápsula */
+.explore-navigation {
+  height: 76px;
+  padding: 9px 18px;
+  border-top: 1px solid rgba(64, 50, 82, 0.08);
+  background: #fff3df;
+  box-shadow: 0 -4px 16px rgba(57, 45, 70, 0.07);
+}
+
+.explore-navigation button {
+  min-width: 82px;
+  min-height: 52px;
+  padding: 6px 15px;
+  border: none;
+  border-radius: 18px;
+  background: transparent;
+  color: #9b909e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.explore-navigation button span {
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.explore-navigation button small {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.explore-navigation button:hover {
+  background: rgba(196, 225, 230, 0.45);
+  color: #392d46;
+}
+
+.explore-navigation button.active {
+  border-radius: 18px;
+  background: #c4e1e6;
+  color: #392d46;
+  box-shadow: 0 2px 7px rgba(57, 45, 70, 0.08);
+}
+
+.explore-navigation button:active {
+  transform: scale(0.97);
+}
+
+.explore-filters button:focus-visible,
+.explore-navigation button:focus-visible,
+.explore-profile-button:focus-visible,
+.explore-empty button:focus-visible {
+  outline: 2px solid #c4e1e6;
+  outline-offset: 3px;
+}
