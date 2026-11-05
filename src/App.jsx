@@ -868,6 +868,7 @@ function App() {
         fotoPerfil={usuario?.fotoPerfil}
         onOpenMap={() => setTelaAtual("mapa")}
         onOpenAgenda={() => setTelaAtual("agenda")}
+        onOpenSaved={() => setTelaAtual("salvos")}
         onOpenProfile={() => setTelaAtual("perfil")}
       />
     );
