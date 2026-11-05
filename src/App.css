@@ -24,7 +24,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   margin: 0 auto;
-  background: #efeaff;
+  background: #f8f3eb;
 }
 
 
@@ -573,7 +573,7 @@ body {
   justify-content: center;
   padding: 24px;
   box-sizing: border-box;
-  background: #efeaff;
+  background: #f8f3eb;
 }
 
 .login-card {
@@ -637,7 +637,7 @@ body {
   margin-bottom: 20px;
   padding: 4px;
   border-radius: 13px;
-  background: #efeaff;
+  background: #f8f3eb;
 }
 
 .login-type-button {
@@ -697,7 +697,7 @@ body {
 }
 
 .login-field input:focus {
-  border-color: #7b61ff;
+  border-color: #6b9ba2;
   background: #ffffff;
 }
 
@@ -797,7 +797,7 @@ body {
 
 .profile-screen {
   min-height: 100vh;
-  background: #efeaff;
+  background: #f8f3eb;
 }
 
 .profile-page {
@@ -878,7 +878,7 @@ body {
 .producer-area {
   width: 100%;
   min-height: 100vh;
-  background: #efeaff;
+  background: #f8f3eb;
   color: #403252;
   padding-bottom: 80px;
   overflow-y: auto;
@@ -1001,8 +1001,8 @@ body {
 .producer-card input:focus,
 .producer-card select:focus,
 .producer-card textarea:focus {
-  border-color: #7b61ff;
-  box-shadow: 0 0 0 2px rgba(123, 97, 255, 0.08);
+  border-color: #6b9ba2;
+  box-shadow: 0 0 0 2px rgba(107, 155, 162, 0.12);
 }
 
 .producer-form-row {
@@ -1026,7 +1026,7 @@ body {
   padding: 11px 12px;
   border-left: 3px solid #b9dfe1;
   border-radius: 8px;
-  background: #efeaff;
+  background: #f8f3eb;
 }
 
 .producer-source strong {
@@ -1170,7 +1170,7 @@ body {
   padding: 7px 10px;
   border: none;
   border-radius: 9px;
-  background: #efeaff;
+  background: #f8f3eb;
   color: #403252;
   font-size: 9px;
   font-weight: 700;
@@ -1178,7 +1178,7 @@ body {
 }
 
 .producer-event-actions button:hover {
-  background: #ddd5ef;
+  background: #d8edf0;
 }
 
 .producer-event-actions .moderation-button {
@@ -1497,7 +1497,7 @@ html, body, #root {
   margin: 0 auto;
   padding: 0;
   overflow: hidden;
-  background: #efeaff;
+  background: #f8f3eb;
 }
 
 .producer-header {
