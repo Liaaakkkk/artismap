@@ -4,6 +4,7 @@ import Calendar from "./components/Calendar";
 import EventCard from "./components/EventCard";
 import ProducerArea from "./components/ProducerArea";
 import CatalogoEventos from "./pages/CatalogoEventos";
+import ExploreEvents from "./pages/ExploreEvents";
 
 import SearchBar from "./components/SearchBar";
 import CategoryFilters from "./components/CategoryFilters";
@@ -294,7 +295,7 @@ function App() {
       return;
     }
 
-    setTelaAtual("mapa");
+    setTelaAtual("explorar");
   }
 
   /*
@@ -311,7 +312,7 @@ function App() {
       return;
     }
 
-    setTelaAtual("mapa");
+    setTelaAtual("explorar");
   }
 
   /*
@@ -637,7 +638,7 @@ function App() {
           handleApproveEvent
         }
         onBack={() =>
-          setTelaAtual("mapa")
+          setTelaAtual("explorar")
         }
       />
     );
@@ -657,7 +658,7 @@ function App() {
             type="button"
             className="profile-back-button"
             onClick={() =>
-              setTelaAtual("mapa")
+              setTelaAtual("explorar")
             }
           >
             ← Voltar
@@ -774,7 +775,7 @@ function App() {
             type="button"
             className="back-button"
             onClick={() =>
-              setTelaAtual("mapa")
+              setTelaAtual("explorar")
             }
             aria-label="Voltar"
           >
@@ -842,7 +843,7 @@ function App() {
           <button
             type="button"
             onClick={() =>
-              setTelaAtual("mapa")
+              setTelaAtual("explorar")
             }
           >
             <span>⌂</span>
@@ -881,6 +882,23 @@ function App() {
         onVoltar={() =>
           setTelaAtual("agenda")
         }
+      />
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | EXPLORAR EVENTOS
+  |--------------------------------------------------------------------------
+  */
+
+  if (telaAtual === "explorar") {
+    return (
+      <ExploreEvents
+        events={events}
+        onOpenMap={() => setTelaAtual("mapa")}
+        onOpenAgenda={() => setTelaAtual("agenda")}
+        onOpenProfile={() => setTelaAtual("perfil")}
       />
     );
   }
