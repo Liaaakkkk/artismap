@@ -320,6 +320,11 @@ function App() {
 
   function handleLogin(usuarioLogado) {
     setUsuario(usuarioLogado);
+    try {
+      setSavedEvents(JSON.parse(localStorage.getItem(`artismap-favoritos-${usuarioLogado.email || "visitante"}`) || "[]"));
+    } catch {
+      setSavedEvents([]);
+    }
 
     if (usuarioLogado.tipo === "produtor") {
       setTelaAtual("produtor");
@@ -337,6 +342,11 @@ function App() {
 
   function handleCadastro(usuarioCadastrado) {
     setUsuario(usuarioCadastrado);
+    try {
+      setSavedEvents(JSON.parse(localStorage.getItem(`artismap-favoritos-${usuarioCadastrado.email || "visitante"}`) || "[]"));
+    } catch {
+      setSavedEvents([]);
+    }
 
     if (usuarioCadastrado.tipo === "produtor") {
       setTelaAtual("produtor");
