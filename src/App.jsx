@@ -16,6 +16,7 @@ import Cadastro from "./components/Cadastro";
 import {
   obterUsuario,
   logoutUsuario,
+  atualizarFotoPerfil,
 } from "./utils/auth";
 
 import culturalPoints from "./data/culturalPoints";
@@ -319,6 +320,20 @@ function App() {
   |--------------------------------------------------------------------------
   */
 
+  async function handlePhotoChange(arquivo) {
+    if (!usuario?.id) {
+      throw new Error("Faça login novamente para alterar sua foto.");
+    }
+
+    const usuarioAtualizado = await atualizarFotoPerfil(
+      usuario.id,
+      arquivo
+    );
+
+    setUsuario(usuarioAtualizado);
+    return usuarioAtualizado;
+  }
+
   function handleLogout() {
     logoutUsuario();
 
@@ -604,6 +619,8 @@ function App() {
 
     return (
       <ProducerArea
+        usuario={usuario}
+        onPhotoChange={handlePhotoChange}
         producer={producer}
         onProducerSave={
           handleProducerSave
@@ -646,9 +663,62 @@ function App() {
             ← Voltar
           </button>
 
-          <div className="profile-avatar">
-            👤
+          <div className="profile-avatar" style={{
+            width: "112px",
+            height: "112px",
+            borderRadius: "50%",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 16px",
+            background: "#eee",
+          }}>
+            {usuario?.fotoPerfil ? (
+              <img
+                src={usuario.fotoPerfil}
+                alt="Foto de perfil"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              "👤"
+            )}
           </div>
+
+          <label
+            htmlFor="foto-perfil-usuario"
+            className="producer-secondary-button"
+            style={{
+              display: "inline-block",
+              cursor: "pointer",
+              marginBottom: "18px",
+            }}
+          >
+            Alterar foto
+          </label>
+          <input
+            id="foto-perfil-usuario"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            style={{ display: "none" }}
+            onChange={async (event) => {
+              const arquivo = event.target.files?.[0];
+              if (!arquivo) return;
+
+              try {
+                await handlePhotoChange(arquivo);
+                alert("Foto de perfil atualizada!");
+              } catch (error) {
+                alert(error.message);
+              } finally {
+                event.target.value = "";
+              }
+            }}
+          />
 
           <h1>Meu perfil</h1>
 
