@@ -76,6 +76,9 @@ function CatalogoEventos({
   const [eventos, setEventos] =
     useState(obterEventosSalvos);
 
+  const [eventoSelecionado, setEventoSelecionado] =
+    useState(null);
+
   const [
     categoriaSelecionada,
     setCategoriaSelecionada,
@@ -597,8 +600,17 @@ function CatalogoEventos({
 
                 return (
                   <article
-                    className={`evento-card ${status}`}
+                    className={`evento-card ${status} evento-card-clicavel`}
                     key={evento.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setEventoSelecionado(evento)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setEventoSelecionado(evento);
+                      }
+                    }}
                   >
                     {evento.imagem && (
                       <img
@@ -668,7 +680,7 @@ function CatalogoEventos({
                       </div>
 
                       {isProdutor && (
-                        <div className="evento-actions">
+                        <div className="evento-actions" onClick={(event) => event.stopPropagation()}>
                           <button
                             type="button"
                             onClick={() =>
@@ -714,6 +726,92 @@ function CatalogoEventos({
           )}
         </section>
       </section>
+
+      {eventoSelecionado && (
+        <div
+          className="evento-modal-overlay"
+          onClick={() => setEventoSelecionado(null)}
+        >
+          <section
+            className="evento-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="evento-modal-titulo"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="evento-modal-fechar"
+              aria-label="Fechar detalhes"
+              onClick={() => setEventoSelecionado(null)}
+            >
+              ×
+            </button>
+
+            {eventoSelecionado.imagem && (
+              <img
+                src={eventoSelecionado.imagem}
+                alt={eventoSelecionado.titulo}
+              />
+            )}
+
+            <span className="evento-categoria">
+              {eventoSelecionado.categoria}
+            </span>
+            <h2 id="evento-modal-titulo">
+              {eventoSelecionado.titulo}
+            </h2>
+
+            {eventoSelecionado.descricao && (
+              <p>{eventoSelecionado.descricao}</p>
+            )}
+
+            <div className="evento-modal-informacoes">
+              <span>📅 {formatarData(eventoSelecionado.data)}</span>
+              {eventoSelecionado.horario && (
+                <span>🕐 {eventoSelecionado.horario}</span>
+              )}
+              {eventoSelecionado.local && (
+                <span>📍 {eventoSelecionado.local}</span>
+              )}
+              {eventoSelecionado.endereco && (
+                <span>
+                  🧭 {eventoSelecionado.endereco}
+                  {eventoSelecionado.cidade
+                    ? `, ${eventoSelecionado.cidade}`
+                    : ""}
+                  {eventoSelecionado.estado
+                    ? ` - ${eventoSelecionado.estado}`
+                    : ""}
+                </span>
+              )}
+              {eventoSelecionado.preco && (
+                <span>💰 {eventoSelecionado.preco}</span>
+              )}
+              {eventoSelecionado.organizador && (
+                <span>✦ Organização: {eventoSelecionado.organizador}</span>
+              )}
+              {eventoSelecionado.link && (
+                <a
+                  href={eventoSelecionado.link}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Acessar página do evento
+                </a>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="evento-modal-botao"
+              onClick={() => setEventoSelecionado(null)}
+            >
+              Fechar
+            </button>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
