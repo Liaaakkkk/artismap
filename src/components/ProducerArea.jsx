@@ -30,6 +30,8 @@ const categories = [
 ];
 
 function ProducerArea({
+  usuario,
+  onPhotoChange,
   producer,
   onProducerSave,
   events,
@@ -468,6 +470,64 @@ function ProducerArea({
               <span>
                 PRODUTOR CADASTRADO
               </span>
+
+              <div style={{
+                width: "104px",
+                height: "104px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                margin: "0 0 14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#eee",
+                fontSize: "36px",
+              }}>
+                {usuario?.fotoPerfil ? (
+                  <img
+                    src={usuario.fotoPerfil}
+                    alt="Foto do produtor"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  "👤"
+                )}
+              </div>
+
+              <label
+                htmlFor="foto-perfil-produtor"
+                className="producer-secondary-button"
+                style={{
+                  display: "inline-block",
+                  cursor: "pointer",
+                  marginBottom: "14px",
+                }}
+              >
+                Alterar foto do perfil
+              </label>
+              <input
+                id="foto-perfil-produtor"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                style={{ display: "none" }}
+                onChange={async (event) => {
+                  const arquivo = event.target.files?.[0];
+                  if (!arquivo) return;
+
+                  try {
+                    await onPhotoChange(arquivo);
+                    setMessage("Foto de perfil atualizada com sucesso.");
+                  } catch (error) {
+                    setMessage(error.message);
+                  } finally {
+                    event.target.value = "";
+                  }
+                }}
+              />
 
               <h2>
                 {producerForm.name}
