@@ -504,3 +504,33 @@
   border-radius: 50%;
   object-fit: cover;
 }
+
+.explore-event-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.explore-event-title-row h3 {
+  flex: 1;
+}
+
+.explore-save-button {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  margin-top: -6px;
+  border: 1px solid #d8cbd9;
+  border-radius: 50%;
+  background: transparent;
+  color: #6f5c79;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.explore-save-button.is-saved {
+  border-color: #392d46;
+  background: #392d46;
+  color: #fff0dc;
+}
