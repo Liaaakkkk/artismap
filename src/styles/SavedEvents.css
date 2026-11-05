@@ -15,6 +15,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 26px 18px 22px;
+  background: #392d46;
+  color: #ffffff;
 }
 
 .saved-eyebrow {
@@ -26,14 +28,14 @@
 
 .saved-header h1 {
   margin: 8px 0 5px;
-  color: #392d46;
+  color: #ffffff;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 29px;
 }
 
 .saved-header p {
   margin: 0;
-  color: #756b7b;
+  color: #eee7f2;
   font-size: 12px;
 }
 
@@ -197,9 +199,11 @@
 
 .saved-empty {
   padding: 34px 18px;
-  border: 1px dashed #d4c8d8;
+  border: 1px solid #eee7df;
   border-radius: 16px;
+  background: #ffffff;
   text-align: center;
+  box-shadow: 0 3px 12px rgba(57, 45, 70, 0.04);
 }
 
 .saved-empty > span {
@@ -209,6 +213,7 @@
 
 .saved-empty h3 {
   margin: 10px 0 6px;
+  color: #392d46;
   font-family: Georgia, "Times New Roman", serif;
 }
 
