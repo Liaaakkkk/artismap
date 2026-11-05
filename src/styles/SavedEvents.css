@@ -5,8 +5,8 @@
   margin: 0 auto;
   padding-bottom: 90px;
   box-sizing: border-box;
-  background: #392d46;
-  color: #fff0dc;
+  background: #fff3df;
+  color: #392d46;
 }
 
 .saved-header {
@@ -26,14 +26,14 @@
 
 .saved-header h1 {
   margin: 8px 0 5px;
-  color: #fff0dc;
+  color: #392d46;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 29px;
 }
 
 .saved-header p {
   margin: 0;
-  color: #e7dcd1;
+  color: #756b7b;
   font-size: 12px;
 }
 
@@ -63,7 +63,7 @@
   min-height: 60vh;
   padding: 20px 16px 28px;
   border-radius: 22px 22px 0 0;
-  background: #f8f3eb;
+  background: #fff3df;
   color: #392d46;
 }
 
