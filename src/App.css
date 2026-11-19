@@ -1260,11 +1260,6 @@ body {
 }
 
 
-/* =========================================
-   BOTÕES DA NAVEGAÇÃO INFERIOR
-   Explorar • Salvos • Perfil
-========================================= */
-
 .bottom-navigation > button {
   flex: 1;
   min-width: 0;
@@ -1482,6 +1477,87 @@ html, body, #root {
   background: #c4e1e6;
   color: #392d46;
   border-color: #c4e1e6;
+/* Ajustes de posicionamento e identidade visual */
+.top-area,
+.producer-header {
+  background: #564787;
+}
+
+.producer-header h1,
+.producer-header p,
+.top-area .map-hint {
+  color: #fff4e7;
+}
+
+.producer-header .back-button {
+  background: #fff3df;
+  color: #403252;
+}
+
+.producer-area {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+.producer-content {
+  flex: 1 0 auto;
+}
+
+.producer-navigation {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  margin-top: auto;
+  flex-shrink: 0;
+  min-height: 68px;
+  background: #fff3df;
+}
+
+.producer-navigation button {
+  flex: 1;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #564787;
+}
+
+.producer-navigation .producer-nav-active {
+  color: #564787;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .producer-area {
+    max-width: 430px;
+    margin: 0 auto;
+  }
+}
+
+
+/* Barra do produtor sempre junto à borda inferior da tela */
+.producer-content {
+  padding-bottom: 100px;
+}
+
+.producer-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  width: 100%;
+  max-width: 430px;
+  transform: translateX(-50%);
+  margin-top: 0;
 }
 
 
@@ -1497,7 +1573,7 @@ html, body, #root {
   margin: 0 auto;
   padding: 0;
   overflow: hidden;
-  background: #f8f3eb;
+  background: #efeaff;
 }
 
 .producer-header {
@@ -1539,37 +1615,4 @@ html, body, #root {
   z-index: 1000;
   background: #fff3df;
   border-top: 1px solid rgba(64, 50, 82, 0.1);
-}
-
-
-/* Botão Catálogo da agenda — alinhado à identidade visual */
-.agenda-screen .catalog-button {
-  min-height: 36px;
-  padding: 8px 14px;
-  border: 1px solid rgba(255, 243, 223, 0.35);
-  border-radius: 999px;
-  background: #fff3df;
-  color: #392d46;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease,
-    transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.agenda-screen .catalog-button:hover {
-  background: #c4e1e6;
-  color: #392d46;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.agenda-screen .catalog-button:active {
-  transform: scale(0.96);
-}
-
-.agenda-screen .catalog-button:focus-visible {
-  outline: 2px solid #c4e1e6;
-  outline-offset: 3px;
 }
