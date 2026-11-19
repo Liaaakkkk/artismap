@@ -358,6 +358,16 @@ button {
   color: #392d46;
 }
 
+.evento-card-clicavel {
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.evento-card-clicavel:hover,
+.evento-card-clicavel:focus-visible {
+  transform: translateY(-2px);
+  outline: 2px solid #564787;
+  outline-offset: 2px;
+}
 /* Cartões de eventos interativos */
 .evento-card-clicavel {
   cursor: pointer;
@@ -381,7 +391,7 @@ button {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(25, 21, 29, 0.72);
+  background: rgba(25, 21, 29, .72);
 }
 
 .evento-modal {
