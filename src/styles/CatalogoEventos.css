@@ -368,6 +368,21 @@ button {
   outline: 2px solid #564787;
   outline-offset: 2px;
 }
+/* Cartões de eventos interativos */
+.evento-card-clicavel {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.evento-card-clicavel:hover,
+.evento-card-clicavel:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+  outline: 2px solid #564787;
+  outline-offset: 2px;
+}
+
+/* Janela de detalhes do evento */
 .evento-modal-overlay {
   position: fixed;
   inset: 0;
@@ -378,18 +393,20 @@ button {
   padding: 20px;
   background: rgba(25, 21, 29, .72);
 }
+
 .evento-modal {
   position: relative;
   width: 100%;
   max-width: 430px;
-  max-height: 85vh;
+  max-height: min(85vh, 760px);
   overflow-y: auto;
   padding: 24px;
   border-radius: 22px;
   background: #fff0dc;
   color: #392d46;
-  box-shadow: 0 18px 50px rgba(0,0,0,.28);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
 }
+
 .evento-modal > img {
   display: block;
   width: calc(100% + 48px);
@@ -397,6 +414,7 @@ button {
   margin: -24px -24px 20px;
   object-fit: cover;
 }
+
 .evento-modal-fechar {
   position: absolute;
   top: 12px;
@@ -408,25 +426,38 @@ button {
   background: #392d46;
   color: #fff0dc;
   font-size: 25px;
+  line-height: 1;
   cursor: pointer;
 }
+
 .evento-modal h2 {
   margin: 8px 36px 10px 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 25px;
+  line-height: 1.15;
 }
+
+.evento-modal > p {
+  color: #5a4b5e;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 .evento-modal-informacoes {
   display: flex;
   flex-direction: column;
   gap: 11px;
   margin: 18px 0;
   font-size: 13px;
+  line-height: 1.45;
 }
+
 .evento-modal-informacoes a {
   color: #564787;
   font-weight: 700;
   overflow-wrap: anywhere;
 }
+
 .evento-modal-botao {
   width: 100%;
   padding: 12px 16px;
@@ -435,4 +466,5 @@ button {
   background: #392d46;
   color: #fff0dc;
   font-weight: 700;
+  cursor: pointer;
 }
