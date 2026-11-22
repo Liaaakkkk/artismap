@@ -1,4 +1,6 @@
+
 import { useEffect, useState } from "react";
+
 import {
   categoriasEventos,
   eventosIniciais,
@@ -8,9 +10,12 @@ import "../styles/CatalogoEventos.css";
 
 const STORAGE_KEY = "artismap_eventos";
 
+// =========================================
+// EVENTOS SALVOS
+// =========================================
+
 function obterEventosSalvos() {
-  const eventosSalvos =
-    localStorage.getItem(STORAGE_KEY);
+  const eventosSalvos = localStorage.getItem(STORAGE_KEY);
 
   if (!eventosSalvos) {
     localStorage.setItem(
@@ -22,16 +27,22 @@ function obterEventosSalvos() {
   }
 
   try {
-    return JSON.parse(eventosSalvos);
+    const eventos = JSON.parse(eventosSalvos);
+
+    return Array.isArray(eventos)
+      ? eventos
+      : eventosIniciais;
   } catch {
     return eventosIniciais;
   }
 }
 
+// =========================================
+// FORMATAR DATA
+// =========================================
+
 function formatarData(data) {
-  if (!data) {
-    return "";
-  }
+  if (!data) return "";
 
   const partes = data.split("-");
 
@@ -41,6 +52,10 @@ function formatarData(data) {
 
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
+
+// =========================================
+// STATUS DO EVENTO
+// =========================================
 
 function obterStatusEvento(evento) {
   if (evento.status === "inativo") {
@@ -66,39 +81,32 @@ function obterStatusEvento(evento) {
   return "agendado";
 }
 
+// =========================================
+// COMPONENTE PRINCIPAL
+// =========================================
+
 function CatalogoEventos({
   usuario,
   onVoltar,
   onOpenProfile,
 }) {
-  const isProdutor =
-    usuario?.tipo === "produtor";
+  const isProdutor = usuario?.tipo === "produtor";
 
-  const [eventos, setEventos] =
-    useState(obterEventosSalvos);
+  const [eventos, setEventos] = useState(obterEventosSalvos);
 
   const [eventoSelecionado, setEventoSelecionado] =
     useState(null);
 
-  const [
-    categoriaSelecionada,
-    setCategoriaSelecionada,
-  ] = useState("Todas");
+  const [categoriaSelecionada, setCategoriaSelecionada] =
+    useState("Todas");
 
-  const [
-    mostrarFormulario,
-    setMostrarFormulario,
-  ] = useState(false);
+  const [mostrarFormulario, setMostrarFormulario] =
+    useState(false);
 
-  const [
-    eventoEditando,
-    setEventoEditando,
-  ] = useState(null);
+  const [eventoEditando, setEventoEditando] =
+    useState(null);
 
-  const [
-    formulario,
-    setFormulario,
-  ] = useState({
+  const formularioInicial = {
     titulo: "",
     descricao: "",
     categoria: "",
@@ -112,7 +120,14 @@ function CatalogoEventos({
     imagem: "",
     link: "",
     organizador: "",
-  });
+  };
+
+  const [formulario, setFormulario] =
+    useState(formularioInicial);
+
+  // =========================================
+  // SALVAR EVENTOS
+  // =========================================
 
   useEffect(() => {
     localStorage.setItem(
@@ -121,36 +136,28 @@ function CatalogoEventos({
     );
   }, [eventos]);
 
+  // =========================================
+  // NOVO EVENTO
+  // =========================================
+
   function abrirNovoEvento() {
-    if (!isProdutor) {
-      return;
-    }
+    if (!isProdutor) return;
 
     setEventoEditando(null);
 
     setFormulario({
-      titulo: "",
-      descricao: "",
-      categoria: "",
-      data: "",
-      horario: "",
-      local: "",
-      endereco: "",
-      cidade: "Fortaleza",
-      estado: "CE",
-      preco: "",
-      imagem: "",
-      link: "",
-      organizador: "",
+      ...formularioInicial,
     });
 
     setMostrarFormulario(true);
   }
 
+  // =========================================
+  // EDITAR EVENTO
+  // =========================================
+
   function editarEvento(evento) {
-    if (!isProdutor) {
-      return;
-    }
+    if (!isProdutor) return;
 
     setEventoEditando(evento.id);
 
@@ -173,6 +180,10 @@ function CatalogoEventos({
     setMostrarFormulario(true);
   }
 
+  // =========================================
+  // ATUALIZAR CAMPOS
+  // =========================================
+
   function atualizarCampo(campo, valor) {
     setFormulario((anterior) => ({
       ...anterior,
@@ -180,18 +191,20 @@ function CatalogoEventos({
     }));
   }
 
+  // =========================================
+  // SALVAR FORMULÁRIO
+  // =========================================
+
   function salvarEvento(event) {
     event.preventDefault();
 
-    if (!isProdutor) {
-      return;
-    }
+    if (!isProdutor) return;
 
     if (
-      !formulario.titulo ||
+      !formulario.titulo.trim() ||
       !formulario.categoria ||
       !formulario.data ||
-      !formulario.local
+      !formulario.local.trim()
     ) {
       alert(
         "Preencha título, categoria, data e local."
@@ -200,7 +213,7 @@ function CatalogoEventos({
       return;
     }
 
-    if (eventoEditando) {
+    if (eventoEditando !== null) {
       setEventos((anteriores) =>
         anteriores.map((evento) =>
           evento.id === eventoEditando
@@ -211,14 +224,23 @@ function CatalogoEventos({
             : evento
         )
       );
+
+      // Atualiza também o evento aberto no modal.
+      setEventoSelecionado((anterior) =>
+        anterior?.id === eventoEditando
+          ? {
+              ...anterior,
+              ...formulario,
+            }
+          : anterior
+      );
     } else {
       const novoEvento = {
         id: Date.now(),
         ...formulario,
         status: "agendado",
         criadoPor: usuario?.email || "",
-        criadoEm:
-          new Date().toISOString(),
+        criadoEm: new Date().toISOString(),
       };
 
       setEventos((anteriores) => [
@@ -229,12 +251,15 @@ function CatalogoEventos({
 
     setMostrarFormulario(false);
     setEventoEditando(null);
+    setFormulario({ ...formularioInicial });
   }
 
+  // =========================================
+  // INATIVAR EVENTO
+  // =========================================
+
   function inativarEvento(id) {
-    if (!isProdutor) {
-      return;
-    }
+    if (!isProdutor) return;
 
     setEventos((anteriores) =>
       anteriores.map((evento) =>
@@ -246,12 +271,23 @@ function CatalogoEventos({
           : evento
       )
     );
+
+    setEventoSelecionado((anterior) =>
+      anterior?.id === id
+        ? {
+            ...anterior,
+            status: "inativo",
+          }
+        : anterior
+    );
   }
 
+  // =========================================
+  // REATIVAR EVENTO
+  // =========================================
+
   function reativarEvento(id) {
-    if (!isProdutor) {
-      return;
-    }
+    if (!isProdutor) return;
 
     setEventos((anteriores) =>
       anteriores.map((evento) =>
@@ -263,20 +299,40 @@ function CatalogoEventos({
           : evento
       )
     );
+
+    setEventoSelecionado((anterior) =>
+      anterior?.id === id
+        ? {
+            ...anterior,
+            status: "agendado",
+          }
+        : anterior
+    );
   }
+
+  // =========================================
+  // FILTRAR EVENTOS
+  // =========================================
 
   const eventosFiltrados =
     categoriaSelecionada === "Todas"
       ? eventos
       : eventos.filter(
           (evento) =>
-            evento.categoria ===
-            categoriaSelecionada
+            evento.categoria === categoriaSelecionada
         );
+
+  // =========================================
+  // RENDERIZAÇÃO
+  // =========================================
 
   return (
     <main className="catalogo-page">
+
+      {/* CABEÇALHO */}
+
       <header className="catalogo-header">
+
         <button
           type="button"
           onClick={onVoltar}
@@ -288,10 +344,10 @@ function CatalogoEventos({
           <h1>Catálogo de eventos</h1>
 
           <p>
-            Encontre eventos culturais
-            em Fortaleza.
+            Encontre eventos culturais em Fortaleza.
           </p>
         </div>
+
         <button
           type="button"
           className="profile-button catalog-profile-button"
@@ -299,35 +355,43 @@ function CatalogoEventos({
           onClick={onOpenProfile}
         >
           {usuario?.fotoPerfil ? (
-            <img src={usuario.fotoPerfil} alt="Foto de perfil" />
-          ) : "👤"}
+            <img
+              src={usuario.fotoPerfil}
+              alt="Foto de perfil"
+            />
+          ) : (
+            "👤"
+          )}
         </button>
+
       </header>
 
+      {/* CONTEÚDO */}
+
       <section className="catalogo-content">
+
+        {/* FILTROS E BOTÃO DE CADASTRO */}
+
         <div className="catalogo-top">
+
           <select
             value={categoriaSelecionada}
             onChange={(event) =>
-              setCategoriaSelecionada(
-                event.target.value
-              )
+              setCategoriaSelecionada(event.target.value)
             }
           >
             <option value="Todas">
               Todas as categorias
             </option>
 
-            {categoriasEventos.map(
-              (categoria) => (
-                <option
-                  key={categoria}
-                  value={categoria}
-                >
-                  {categoria}
-                </option>
-              )
-            )}
+            {categoriasEventos.map((categoria) => (
+              <option
+                key={categoria}
+                value={categoria}
+              >
+                {categoria}
+              </option>
+            ))}
           </select>
 
           {isProdutor && (
@@ -339,439 +403,447 @@ function CatalogoEventos({
               + Novo evento
             </button>
           )}
+
         </div>
+
+        {/* INFORMAÇÃO PARA VISITANTES */}
 
         {!isProdutor && (
           <div className="catalogo-info">
             <p>
-              Você está visualizando o
-              catálogo de eventos.
+              Você está visualizando o catálogo de eventos.
             </p>
           </div>
         )}
 
-        {mostrarFormulario &&
-          isProdutor && (
-            <form
-              className="evento-form"
-              onSubmit={salvarEvento}
-            >
-              <h2>
-                {eventoEditando
-                  ? "Editar evento"
-                  : "Novo evento"}
-              </h2>
+        {/* FORMULÁRIO */}
 
-              <label>
-                Título
-                <input
-                  type="text"
-                  value={
-                    formulario.titulo
-                  }
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "titulo",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+        {mostrarFormulario && isProdutor && (
+          <form
+            className="evento-form"
+            onSubmit={salvarEvento}
+          >
 
-              <label>
-                Descrição
-                <textarea
-                  value={
-                    formulario.descricao
-                  }
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "descricao",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+            <h2>
+              {eventoEditando !== null
+                ? "Editar evento"
+                : "Novo evento"}
+            </h2>
 
-              <label>
-                Categoria
-                <select
-                  value={
-                    formulario.categoria
-                  }
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "categoria",
-                      event.target.value
-                    )
-                  }
-                >
-                  <option value="">
-                    Selecione
+            <label>
+              Título
+
+              <input
+                type="text"
+                value={formulario.titulo}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "titulo",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            <label>
+              Descrição
+
+              <textarea
+                value={formulario.descricao}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "descricao",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            <label>
+              Categoria
+
+              <select
+                value={formulario.categoria}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "categoria",
+                    event.target.value
+                  )
+                }
+              >
+                <option value="">
+                  Selecione
+                </option>
+
+                {categoriasEventos.map((categoria) => (
+                  <option
+                    key={categoria}
+                    value={categoria}
+                  >
+                    {categoria}
                   </option>
+                ))}
+              </select>
+            </label>
 
-                  {categoriasEventos.map(
-                    (categoria) => (
-                      <option
-                        key={categoria}
-                        value={categoria}
-                      >
-                        {categoria}
-                      </option>
-                    )
-                  )}
-                </select>
-              </label>
+            <label>
+              Data
 
-              <label>
-                Data
-                <input
-                  type="date"
-                  value={formulario.data}
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "data",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+              <input
+                type="date"
+                value={formulario.data}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "data",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
 
-              <label>
-                Horário
-                <input
-                  type="time"
-                  value={
-                    formulario.horario
-                  }
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "horario",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+            <label>
+              Horário
 
-              <label>
-                Local
-                <input
-                  type="text"
-                  value={formulario.local}
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "local",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+              <input
+                type="time"
+                value={formulario.horario}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "horario",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
 
-              <label>
-                Endereço
-                <input
-                  type="text"
-                  value={
-                    formulario.endereco
-                  }
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "endereco",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+            <label>
+              Local
 
-              <label>
-                Cidade
-                <input
-                  type="text"
-                  value={formulario.cidade}
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "cidade",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+              <input
+                type="text"
+                value={formulario.local}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "local",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
 
-              <label>
-                Estado
-                <input
-                  type="text"
-                  value={formulario.estado}
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "estado",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+            <label>
+              Endereço
 
-              <label>
-                Preço
-                <input
-                  type="text"
-                  placeholder="Gratuito ou R$ 20,00"
-                  value={formulario.preco}
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "preco",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+              <input
+                type="text"
+                value={formulario.endereco}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "endereco",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
 
-              <label>
-                Imagem
-                <input
-                  type="text"
-                  placeholder="URL da imagem"
-                  value={formulario.imagem}
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "imagem",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+            <label>
+              Cidade
 
-              <label>
-                Link
-                <input
-                  type="text"
-                  placeholder="Link do evento"
-                  value={formulario.link}
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "link",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+              <input
+                type="text"
+                value={formulario.cidade}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "cidade",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
 
-              <label>
-                Organizador
-                <input
-                  type="text"
-                  value={
-                    formulario.organizador
-                  }
-                  onChange={(event) =>
-                    atualizarCampo(
-                      "organizador",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
+            <label>
+              Estado
 
-              <div className="evento-form-actions">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMostrarFormulario(
-                      false
-                    );
-                    setEventoEditando(null);
-                  }}
-                >
-                  Cancelar
-                </button>
+              <input
+                type="text"
+                value={formulario.estado}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "estado",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
 
-                <button type="submit">
-                  {eventoEditando
-                    ? "Salvar alterações"
-                    : "Cadastrar evento"}
-                </button>
-              </div>
-            </form>
-          )}
+            <label>
+              Preço
+
+              <input
+                type="text"
+                placeholder="Gratuito ou R$ 20,00"
+                value={formulario.preco}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "preco",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            <label>
+              Imagem
+
+              <input
+                type="text"
+                placeholder="URL da imagem"
+                value={formulario.imagem}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "imagem",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            <label>
+              Link
+
+              <input
+                type="text"
+                placeholder="Link do evento"
+                value={formulario.link}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "link",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            <label>
+              Organizador
+
+              <input
+                type="text"
+                value={formulario.organizador}
+                onChange={(event) =>
+                  atualizarCampo(
+                    "organizador",
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            {/* BOTÕES DO FORMULÁRIO */}
+
+            <div className="evento-form-actions">
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMostrarFormulario(false);
+                  setEventoEditando(null);
+                  setFormulario({ ...formularioInicial });
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button type="submit">
+                {eventoEditando !== null
+                  ? "Salvar alterações"
+                  : "Cadastrar evento"}
+              </button>
+
+            </div>
+
+          </form>
+        )}
+
+        {/* LISTA DE EVENTOS */}
 
         <section className="eventos-lista">
-          {eventosFiltrados.length === 0 ? (
-            <div className="empty-state">
-              <p>
-                Nenhum evento encontrado.
-              </p>
-            </div>
-          ) : (
-            eventosFiltrados.map(
-              (evento) => {
-                const status =
-                  obterStatusEvento(
-                    evento
-                  );
 
-                return (
-                  <article
-                    className={`evento-card ${status} evento-card-clicavel`}
-                    key={evento.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setEventoSelecionado(evento)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setEventoSelecionado(evento);
-                      }
-                    }}
-                  >
-                    {evento.imagem && (
-                      <img
-                        src={evento.imagem}
-                        alt={evento.titulo}
-                        className="evento-imagem"
-                      />
+          {eventosFiltrados.length === 0 ? (
+
+            <div className="empty-state">
+              <p>Nenhum evento encontrado.</p>
+            </div>
+
+          ) : (
+
+            eventosFiltrados.map((evento) => {
+
+              const status = obterStatusEvento(evento);
+
+              return (
+                <article
+                  className={`evento-card ${status} evento-card-clicavel`}
+                  key={evento.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() =>
+                    setEventoSelecionado(evento)
+                  }
+                  onKeyDown={(event) => {
+                    if (
+                      event.key === "Enter" ||
+                      event.key === " "
+                    ) {
+                      event.preventDefault();
+                      setEventoSelecionado(evento);
+                    }
+                  }}
+                >
+
+                  {evento.imagem && (
+                    <img
+                      src={evento.imagem}
+                      alt={evento.titulo}
+                      className="evento-imagem"
+                    />
+                  )}
+
+                  <div className="evento-card-content">
+
+                    <span className="evento-categoria">
+                      {evento.categoria}
+                    </span>
+
+                    <h2>{evento.titulo}</h2>
+
+                    {evento.descricao && (
+                      <p>{evento.descricao}</p>
                     )}
 
-                    <div className="evento-card-content">
-                      <span className="evento-categoria">
-                        {evento.categoria}
+                    <div className="evento-info">
+
+                      <span>
+                        📅 {formatarData(evento.data)}
                       </span>
 
-                      <h2>
-                        {evento.titulo}
-                      </h2>
-
-                      {evento.descricao && (
-                        <p>
-                          {evento.descricao}
-                        </p>
+                      {evento.horario && (
+                        <span>
+                          🕐 {evento.horario}
+                        </span>
                       )}
 
-                      <div className="evento-info">
+                      <span>
+                        📍 {evento.local}
+                      </span>
+
+                      {evento.preco && (
                         <span>
-                          📅{" "}
-                          {formatarData(
-                            evento.data
-                          )}
+                          💰 {evento.preco}
                         </span>
+                      )}
 
-                        {evento.horario && (
-                          <span>
-                            🕐{" "}
-                            {
-                              evento.horario
-                            }
-                          </span>
-                        )}
+                    </div>
 
-                        <span>
-                          📍{" "}
-                          {evento.local}
-                        </span>
+                    <div className="evento-status">
 
-                        {evento.preco && (
-                          <span>
-                            💰{" "}
-                            {evento.preco}
-                          </span>
-                        )}
-                      </div>
+                      {status === "inativo" &&
+                        "Evento inativo"}
 
-                      <div className="evento-status">
-                        {status ===
-                          "inativo" &&
-                          "Evento inativo"}
+                      {status === "agendado" &&
+                        "Evento agendado"}
 
-                        {status ===
-                          "agendado" &&
-                          "Evento agendado"}
+                      {status === "encerrado" &&
+                        "Evento encerrado"}
 
-                        {status ===
-                          "encerrado" &&
-                          "Evento encerrado"}
-                      </div>
+                    </div>
 
-                      {isProdutor && (
-                        <div className="evento-actions" onClick={(event) => event.stopPropagation()}>
+                    {/* AÇÕES DO PRODUTOR */}
+
+                    {isProdutor && (
+                      <div
+                        className="evento-actions"
+                        onClick={(event) =>
+                          event.stopPropagation()
+                        }
+                      >
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            editarEvento(evento)
+                          }
+                        >
+                          Editar
+                        </button>
+
+                        {status === "inativo" ? (
+
                           <button
                             type="button"
                             onClick={() =>
-                              editarEvento(
-                                evento
-                              )
+                              reativarEvento(evento.id)
                             }
                           >
-                            Editar
+                            Reativar
                           </button>
 
-                          {status ===
-                          "inativo" ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                reativarEvento(
-                                  evento.id
-                                )
-                              }
-                            >
-                              Reativar
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                inativarEvento(
-                                  evento.id
-                                )
-                              }
-                            >
-                              Inativar
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                );
-              }
-            )
+                        ) : (
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              inativarEvento(evento.id)
+                            }
+                          >
+                            Inativar
+                          </button>
+
+                        )}
+
+                      </div>
+                    )}
+
+                  </div>
+
+                </article>
+              );
+            })
+
           )}
+
         </section>
+
       </section>
 
+      {/* MODAL DE DETALHES DO EVENTO */}
+
       {eventoSelecionado && (
-        <div className="evento-modal-overlay" onClick={() => setEventoSelecionado(null)}>
-          <section className="evento-modal" role="dialog" aria-modal="true" aria-labelledby="evento-modal-titulo" onClick={(event) => event.stopPropagation()}>
-            <button type="button" className="evento-modal-fechar" aria-label="Fechar detalhes" onClick={() => setEventoSelecionado(null)}>×</button>
-            {eventoSelecionado.imagem && <img src={eventoSelecionado.imagem} alt={eventoSelecionado.titulo} />}
-            <span className="evento-categoria">{eventoSelecionado.categoria}</span>
-            <h2 id="evento-modal-titulo">{eventoSelecionado.titulo}</h2>
-            {eventoSelecionado.descricao && <p>{eventoSelecionado.descricao}</p>}
-            <div className="evento-modal-informacoes">
-              <span>📅 {formatarData(eventoSelecionado.data)}</span>
-              {eventoSelecionado.horario && <span>🕐 {eventoSelecionado.horario}</span>}
-              {eventoSelecionado.local && <span>📍 {eventoSelecionado.local}</span>}
-              {eventoSelecionado.endereco && <span>🧭 {eventoSelecionado.endereco}{eventoSelecionado.cidade ? `, ${eventoSelecionado.cidade}` : ""}{eventoSelecionado.estado ? ` - ${eventoSelecionado.estado}` : ""}</span>}
-              {eventoSelecionado.preco && <span>💰 {eventoSelecionado.preco}</span>}
-              {eventoSelecionado.organizador && <span>✦ Organização: {eventoSelecionado.organizador}</span>}
-              {eventoSelecionado.link && <a href={eventoSelecionado.link} target="_blank" rel="noreferrer">Acessar página do evento</a>}
-            </div>
-            <button type="button" className="evento-modal-botao" onClick={() => setEventoSelecionado(null)}>Fechar</button>
+
         <div
           className="evento-modal-overlay"
-          onClick={() => setEventoSelecionado(null)}
+          onClick={() =>
+            setEventoSelecionado(null)
+          }
         >
+
           <section
             className="evento-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="evento-modal-titulo"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
           >
+
             <button
               type="button"
               className="evento-modal-fechar"
               aria-label="Fechar detalhes"
-              onClick={() => setEventoSelecionado(null)}
+              onClick={() =>
+                setEventoSelecionado(null)
+              }
             >
               ×
             </button>
@@ -786,6 +858,7 @@ function CatalogoEventos({
             <span className="evento-categoria">
               {eventoSelecionado.categoria}
             </span>
+
             <h2 id="evento-modal-titulo">
               {eventoSelecionado.titulo}
             </h2>
@@ -795,13 +868,23 @@ function CatalogoEventos({
             )}
 
             <div className="evento-modal-informacoes">
-              <span>📅 {formatarData(eventoSelecionado.data)}</span>
+
+              <span>
+                📅 {formatarData(eventoSelecionado.data)}
+              </span>
+
               {eventoSelecionado.horario && (
-                <span>🕐 {eventoSelecionado.horario}</span>
+                <span>
+                  🕐 {eventoSelecionado.horario}
+                </span>
               )}
+
               {eventoSelecionado.local && (
-                <span>📍 {eventoSelecionado.local}</span>
+                <span>
+                  📍 {eventoSelecionado.local}
+                </span>
               )}
+
               {eventoSelecionado.endereco && (
                 <span>
                   🧭 {eventoSelecionado.endereco}
@@ -813,12 +896,19 @@ function CatalogoEventos({
                     : ""}
                 </span>
               )}
+
               {eventoSelecionado.preco && (
-                <span>💰 {eventoSelecionado.preco}</span>
+                <span>
+                  💰 {eventoSelecionado.preco}
+                </span>
               )}
+
               {eventoSelecionado.organizador && (
-                <span>✦ Organização: {eventoSelecionado.organizador}</span>
+                <span>
+                  ✦ Organização: {eventoSelecionado.organizador}
+                </span>
               )}
+
               {eventoSelecionado.link && (
                 <a
                   href={eventoSelecionado.link}
@@ -828,18 +918,26 @@ function CatalogoEventos({
                   Acessar página do evento
                 </a>
               )}
+
             </div>
 
             <button
               type="button"
               className="evento-modal-botao"
-              onClick={() => setEventoSelecionado(null)}
+              onClick={() =>
+                setEventoSelecionado(null)
+              }
             >
               Fechar
             </button>
+
           </section>
+
         </div>
+
       )}
+      
+
     </main>
   );
 }

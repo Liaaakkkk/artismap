@@ -168,3 +168,13 @@
     margin-bottom: 26px;
   }
 }
+
+.profile-page {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 25px 20px 40px;
+  box-sizing: border-box;
+}
