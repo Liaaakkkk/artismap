@@ -1,3 +1,4 @@
+
 import {
   MapContainer,
   TileLayer,
@@ -6,20 +7,25 @@ import {
   useMap,
 } from "react-leaflet";
 
+import { useEffect } from "react";
 import L from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 
 import categoryConfig from "../utils/categoryConfig";
 
-function createCategoryIcon(category) {
+function createCategoryIcon(category, type) {
   const config = categoryConfig[category];
+
+  const icon = type === "evento"
+    ? "🎭"
+    : config?.icon || "📍";
 
   return L.divIcon({
     className: "custom-marker-wrapper",
     html: `
       <div class="custom-marker">
-        <span>${config?.icon || "📍"}</span>
+        <span>${icon}</span>
       </div>
     `,
     iconSize: [44, 44],
@@ -31,9 +37,11 @@ function createCategoryIcon(category) {
 function MapCenter({ userLocation }) {
   const map = useMap();
 
-  if (userLocation) {
-    map.setView(userLocation, 15);
-  }
+  useEffect(() => {
+    if (userLocation) {
+      map.setView(userLocation, 15);
+    }
+  }, [userLocation, map]);
 
   return null;
 }
@@ -54,55 +62,76 @@ function MapView({ points, userLocation }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {userLocation && <MapCenter userLocation={userLocation} />}
+        {userLocation && (
+          <MapCenter userLocation={userLocation} />
+        )}
 
-        {points.map((point) => (
-          <Marker
-            key={point.id}
-            position={[point.latitude, point.longitude]}
-            icon={createCategoryIcon(point.category)}
-            title={point.name}
-          >
-            <Popup>
-              <div className="popup-content">
-                <div className="popup-category">
-                  {categoryConfig[point.category]?.icon}{" "}
-                  {categoryConfig[point.category]?.label}
-                </div>
-
-                <h3>{point.name}</h3>
-
-                <p>{point.description}</p>
-
-                <div className="popup-info">
-                  <strong>📍 Endereço</strong>
-                  <span>
-                    {point.address}, {point.city}
-                  </span>
-                </div>
-
-                {point.date && (
-                  <div className="popup-info">
-                    <strong>📅 Data</strong>
-                    <span>{point.date}</span>
+        {points
+          .filter((point) => {
+            return (
+              Number.isFinite(Number(point.latitude)) &&
+              Number.isFinite(Number(point.longitude))
+            );
+          })
+          .map((point) => (
+            <Marker
+              key={`${point.type || "ponto"}-${point.id}`}
+              position={[
+                Number(point.latitude),
+                Number(point.longitude),
+              ]}
+              icon={createCategoryIcon(
+                point.category,
+                point.type
+              )}
+              title={point.name}
+            >
+              <Popup>
+                <div className="popup-content">
+                  <div className="popup-category">
+                    {point.type === "evento"
+                      ? "🎭 Evento cultural"
+                      : `${categoryConfig[point.category]?.icon || "📍"} ${
+                          categoryConfig[point.category]?.label || "Ponto cultural"
+                        }`}
                   </div>
-                )}
 
-                {point.time && (
+                  <h3>{point.name}</h3>
+
+                  <p>{point.description}</p>
+
                   <div className="popup-info">
-                    <strong>🕐 Horário</strong>
-                    <span>{point.time}</span>
+                    <strong>📍 Endereço</strong>
+                    <span>
+                      {point.address || "Endereço não informado"}
+                      {point.city ? `, ${point.city}` : ""}
+                    </span>
                   </div>
-                )}
 
-                <div className="popup-info">
-                  <strong>💰 Entrada</strong>
-                  <span>{point.price}</span>
+                  {point.date && (
+                    <div className="popup-info">
+                      <strong>📅 Data</strong>
+                      <span>{point.date}</span>
+                    </div>
+                  )}
+
+                  {point.time && (
+                    <div className="popup-info">
+                      <strong>🕐 Horário</strong>
+                      <span>{point.time}</span>
+                    </div>
+                  )}
+
+                  {point.price && (
+                    <div className="popup-info">
+                      <strong>💰 Entrada</strong>
+                      <span>{point.price}</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          ))}
       </MapContainer>
     </div>
   );

@@ -1,40 +1,31 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  categoriasEventos,
-  eventosIniciais,
-} from "../data/events";
+import { categoriasEventos } from "../data/events";
 
 import "../styles/CatalogoEventos.css";
 
-const STORAGE_KEY = "artismap_eventos";
+const API_URL = "http://localhost:3001/api/eventos";
 
 // =========================================
-// EVENTOS SALVOS
+// PREPARAR EVENTO RECEBIDO DO MONGODB
 // =========================================
 
-function obterEventosSalvos() {
-  const eventosSalvos = localStorage.getItem(STORAGE_KEY);
+function prepararEvento(evento) {
+  return {
+    ...evento,
+    id: String(evento._id || evento.id),
 
-  if (!eventosSalvos) {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(eventosIniciais)
-    );
+    latitude:
+      evento.latitude == null
+        ? ""
+        : String(evento.latitude),
 
-    return eventosIniciais;
-  }
-
-  try {
-    const eventos = JSON.parse(eventosSalvos);
-
-    return Array.isArray(eventos)
-      ? eventos
-      : eventosIniciais;
-  } catch {
-    return eventosIniciais;
-  }
+    longitude:
+      evento.longitude == null
+        ? ""
+        : String(evento.longitude),
+  };
 }
 
 // =========================================
@@ -67,12 +58,9 @@ function obterStatusEvento(evento) {
   }
 
   const hoje = new Date();
-
   hoje.setHours(0, 0, 0, 0);
 
-  const dataEvento = new Date(
-    `${evento.data}T00:00:00`
-  );
+  const dataEvento = new Date(`${evento.data}T00:00:00`);
 
   if (dataEvento < hoje) {
     return "encerrado";
@@ -92,7 +80,8 @@ function CatalogoEventos({
 }) {
   const isProdutor = usuario?.tipo === "produtor";
 
-  const [eventos, setEventos] = useState(obterEventosSalvos);
+  const [eventos, setEventos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
 
   const [eventoSelecionado, setEventoSelecionado] =
     useState(null);
@@ -120,24 +109,47 @@ function CatalogoEventos({
     imagem: "",
     link: "",
     organizador: "",
+    latitude: "",
+    longitude: "",
   };
 
   const [formulario, setFormulario] =
     useState(formularioInicial);
 
   // =========================================
-  // SALVAR EVENTOS
+  // CARREGAR EVENTOS DO MONGODB
   // =========================================
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(eventos)
-    );
-  }, [eventos]);
+    async function carregarEventos() {
+      try {
+        const resposta = await fetch(API_URL);
+
+        if (!resposta.ok) {
+          throw new Error(
+            "Não foi possível buscar os eventos."
+          );
+        }
+
+        const dados = await resposta.json();
+
+        setEventos(dados.map(prepararEvento));
+      } catch (error) {
+        console.error("Erro ao carregar eventos:", error);
+
+        alert(
+          "Não foi possível carregar os eventos. Verifique se o backend está funcionando."
+        );
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregarEventos();
+  }, []);
 
   // =========================================
-  // NOVO EVENTO
+  // ABRIR FORMULÁRIO DE NOVO EVENTO
   // =========================================
 
   function abrirNovoEvento() {
@@ -175,13 +187,15 @@ function CatalogoEventos({
       imagem: evento.imagem || "",
       link: evento.link || "",
       organizador: evento.organizador || "",
+      latitude: evento.latitude ?? "",
+      longitude: evento.longitude ?? "",
     });
 
     setMostrarFormulario(true);
   }
 
   // =========================================
-  // ATUALIZAR CAMPOS
+  // ATUALIZAR CAMPOS DO FORMULÁRIO
   // =========================================
 
   function atualizarCampo(campo, valor) {
@@ -192,10 +206,10 @@ function CatalogoEventos({
   }
 
   // =========================================
-  // SALVAR FORMULÁRIO
+  // SALVAR EVENTO NO MONGODB
   // =========================================
 
-  function salvarEvento(event) {
+  async function salvarEvento(event) {
     event.preventDefault();
 
     if (!isProdutor) return;
@@ -206,108 +220,179 @@ function CatalogoEventos({
       !formulario.data ||
       !formulario.local.trim()
     ) {
-      alert(
-        "Preencha título, categoria, data e local."
-      );
-
+      alert("Preencha título, categoria, data e local.");
       return;
     }
 
-    if (eventoEditando !== null) {
+    // Verifica se as duas coordenadas foram preenchidas.
+    const latitudePreenchida =
+      String(formulario.latitude).trim() !== "";
+
+    const longitudePreenchida =
+      String(formulario.longitude).trim() !== "";
+
+    if (latitudePreenchida !== longitudePreenchida) {
+      alert(
+        "Preencha latitude e longitude juntas ou deixe os dois campos vazios."
+      );
+      return;
+    }
+
+    let latitude = null;
+    let longitude = null;
+
+    if (latitudePreenchida && longitudePreenchida) {
+      latitude = Number(formulario.latitude);
+      longitude = Number(formulario.longitude);
+
+      if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180
+      ) {
+        alert(
+          "Coordenadas inválidas. Confira os valores de latitude e longitude."
+        );
+        return;
+      }
+    }
+
+    try {
+      const editando = eventoEditando !== null;
+
+      const url = editando
+        ? `${API_URL}/${eventoEditando}`
+        : API_URL;
+
+      const eventoParaSalvar = {
+        ...formulario,
+        latitude,
+        longitude,
+      };
+
+      const resposta = await fetch(url, {
+        method: editando ? "PUT" : "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify(
+          editando
+            ? eventoParaSalvar
+            : {
+                ...eventoParaSalvar,
+                status: "agendado",
+                criadoPor: usuario?.email || "",
+              }
+        ),
+      });
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.mensagem || "Erro ao salvar evento."
+        );
+      }
+
+      const eventoAtualizado = prepararEvento(dados);
+
+      if (editando) {
+        setEventos((anteriores) =>
+          anteriores.map((evento) =>
+            evento.id === eventoEditando
+              ? eventoAtualizado
+              : evento
+          )
+        );
+
+        setEventoSelecionado((anterior) =>
+          anterior?.id === eventoEditando
+            ? eventoAtualizado
+            : anterior
+        );
+
+        alert("Evento atualizado com sucesso!");
+      } else {
+        setEventos((anteriores) => [
+          eventoAtualizado,
+          ...anteriores,
+        ]);
+
+        alert("Evento cadastrado com sucesso!");
+      }
+
+      setMostrarFormulario(false);
+      setEventoEditando(null);
+      setFormulario({ ...formularioInicial });
+    } catch (error) {
+      console.error("Erro ao salvar evento:", error);
+
+      alert(
+        error.message || "Não foi possível salvar o evento."
+      );
+    }
+  }
+
+  // =========================================
+  // ALTERAR STATUS DO EVENTO
+  // =========================================
+
+  async function alterarStatusEvento(id, status) {
+    if (!isProdutor) return;
+
+    try {
+      const resposta = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({ status }),
+      });
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.mensagem ||
+            "Não foi possível atualizar o evento."
+        );
+      }
+
+      const eventoAtualizado = prepararEvento(dados);
+
       setEventos((anteriores) =>
         anteriores.map((evento) =>
-          evento.id === eventoEditando
-            ? {
-                ...evento,
-                ...formulario,
-              }
-            : evento
+          evento.id === id ? eventoAtualizado : evento
         )
       );
 
-      // Atualiza também o evento aberto no modal.
       setEventoSelecionado((anterior) =>
-        anterior?.id === eventoEditando
-          ? {
-              ...anterior,
-              ...formulario,
-            }
-          : anterior
+        anterior?.id === id ? eventoAtualizado : anterior
       );
-    } else {
-      const novoEvento = {
-        id: Date.now(),
-        ...formulario,
-        status: "agendado",
-        criadoPor: usuario?.email || "",
-        criadoEm: new Date().toISOString(),
-      };
+    } catch (error) {
+      console.error("Erro ao alterar status:", error);
 
-      setEventos((anteriores) => [
-        ...anteriores,
-        novoEvento,
-      ]);
+      alert(error.message);
     }
-
-    setMostrarFormulario(false);
-    setEventoEditando(null);
-    setFormulario({ ...formularioInicial });
   }
 
   // =========================================
-  // INATIVAR EVENTO
+  // INATIVAR E REATIVAR
   // =========================================
 
   function inativarEvento(id) {
-    if (!isProdutor) return;
-
-    setEventos((anteriores) =>
-      anteriores.map((evento) =>
-        evento.id === id
-          ? {
-              ...evento,
-              status: "inativo",
-            }
-          : evento
-      )
-    );
-
-    setEventoSelecionado((anterior) =>
-      anterior?.id === id
-        ? {
-            ...anterior,
-            status: "inativo",
-          }
-        : anterior
-    );
+    alterarStatusEvento(id, "inativo");
   }
 
-  // =========================================
-  // REATIVAR EVENTO
-  // =========================================
-
   function reativarEvento(id) {
-    if (!isProdutor) return;
-
-    setEventos((anteriores) =>
-      anteriores.map((evento) =>
-        evento.id === id
-          ? {
-              ...evento,
-              status: "agendado",
-            }
-          : evento
-      )
-    );
-
-    setEventoSelecionado((anterior) =>
-      anterior?.id === id
-        ? {
-            ...anterior,
-            status: "agendado",
-          }
-        : anterior
-    );
+    alterarStatusEvento(id, "agendado");
   }
 
   // =========================================
@@ -392,6 +477,7 @@ function CatalogoEventos({
                 {categoria}
               </option>
             ))}
+
           </select>
 
           {isProdutor && (
@@ -483,6 +569,7 @@ function CatalogoEventos({
                     {categoria}
                   </option>
                 ))}
+
               </select>
             </label>
 
@@ -639,6 +726,60 @@ function CatalogoEventos({
               />
             </label>
 
+            {/* COORDENADAS PARA O MAPA */}
+
+            <div className="coordenadas-section">
+              <h3>Localização no mapa</h3>
+
+              <p>
+                Informe as coordenadas geográficas do local
+                para que o evento apareça no mapa do ArtisMap.
+              </p>
+
+              <label>
+                Latitude
+
+                <input
+                  type="number"
+                  step="any"
+                  min="-90"
+                  max="90"
+                  placeholder="-3.73186"
+                  value={formulario.latitude}
+                  onChange={(event) =>
+                    atualizarCampo(
+                      "latitude",
+                      event.target.value
+                    )
+                  }
+                />
+              </label>
+
+              <label>
+                Longitude
+
+                <input
+                  type="number"
+                  step="any"
+                  min="-180"
+                  max="180"
+                  placeholder="-38.52667"
+                  value={formulario.longitude}
+                  onChange={(event) =>
+                    atualizarCampo(
+                      "longitude",
+                      event.target.value
+                    )
+                  }
+                />
+              </label>
+
+              <small>
+                As coordenadas são opcionais, mas necessárias
+                para exibir o evento no mapa.
+              </small>
+            </div>
+
             {/* BOTÕES DO FORMULÁRIO */}
 
             <div className="evento-form-actions">
@@ -669,7 +810,13 @@ function CatalogoEventos({
 
         <section className="eventos-lista">
 
-          {eventosFiltrados.length === 0 ? (
+          {carregando ? (
+
+            <div className="empty-state">
+              <p>Carregando eventos...</p>
+            </div>
+
+          ) : eventosFiltrados.length === 0 ? (
 
             <div className="empty-state">
               <p>Nenhum evento encontrado.</p>
@@ -913,7 +1060,7 @@ function CatalogoEventos({
                 <a
                   href={eventoSelecionado.link}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                 >
                   Acessar página do evento
                 </a>
@@ -936,7 +1083,6 @@ function CatalogoEventos({
         </div>
 
       )}
-      
 
     </main>
   );

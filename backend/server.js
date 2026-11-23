@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 
 const express = require("express");
@@ -5,14 +6,9 @@ const cors = require("cors");
 
 const connectDatabase = require("./database/db");
 const authRoutes = require("./routes/auth");
+const eventosRoutes = require("./routes/eventos");
 
 const app = express();
-
-/*
-|--------------------------------------------------------------------------
-| Middlewares
-|--------------------------------------------------------------------------
-*/
 
 app.use(
   cors({
@@ -23,27 +19,9 @@ app.use(
 
 app.use(express.json({ limit: "4mb" }));
 
-/*
-|--------------------------------------------------------------------------
-| Banco de dados
-|--------------------------------------------------------------------------
-*/
-
-connectDatabase();
-
-/*
-|--------------------------------------------------------------------------
-| Rotas
-|--------------------------------------------------------------------------
-*/
-
+// ROTAS
 app.use("/api/auth", authRoutes);
-
-/*
-|--------------------------------------------------------------------------
-| Rota inicial
-|--------------------------------------------------------------------------
-*/
+app.use("/api/eventos", eventosRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -51,16 +29,22 @@ app.get("/", (req, res) => {
   });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Servidor
-|--------------------------------------------------------------------------
-*/
-
+// INICIAR APÓS CONECTAR AO BANCO
 const PORT = 3001;
 
-app.listen(PORT, () => {
-  console.log(
-    `Servidor rodando em http://localhost:${PORT}`
-  );
-});
+async function iniciarServidor() {
+  try {
+    await connectDatabase();
+
+    app.listen(PORT, () => {
+      console.log(
+        `Servidor rodando em http://localhost:${PORT}`
+      );
+    });
+  } catch (error) {
+    console.error("Não foi possível iniciar o servidor.");
+    process.exit(1);
+  }
+}
+
+iniciarServidor();

@@ -1,5 +1,13 @@
-import { useMemo, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
+
 import "../styles/ExploreEvents.css";
+
+const API_URL = "http://localhost:3001/api/eventos";
+
+// =========================================
+// CATEGORIAS
+// =========================================
 
 const categorias = [
   "Todas",
@@ -13,42 +21,79 @@ const categorias = [
   "OUTROS",
 ];
 
-function lerEventosDoCatalogo() {
-  try {
-    const salvos = localStorage.getItem("artismap_eventos");
-    return salvos ? JSON.parse(salvos) : [];
-  } catch {
-    return [];
-  }
-}
+// =========================================
+// NORMALIZAR EVENTOS
+// =========================================
 
 function normalizarEvento(evento) {
   return {
     ...evento,
-    id: evento.id ?? evento._id ?? String(evento.titulo || evento.title || "evento") + "-" + String(evento.data || evento.date || ""),
+
+    id:
+      evento.id ??
+      evento._id ??
+      String(evento.titulo || evento.title || "evento") +
+        "-" +
+        String(evento.data || evento.date || ""),
+
     title: evento.title || evento.titulo || "Evento cultural",
-    category: evento.category || evento.categoria || "OUTROS",
+
+    category: (
+      evento.category ||
+      evento.categoria ||
+      "OUTROS"
+    ).toUpperCase(),
+
     date: evento.date || evento.data || "",
+
     time: evento.time || evento.horario || "",
+
     location: evento.location || evento.local || "",
+
     address: evento.address || evento.endereco || "",
+
     city: evento.city || evento.cidade || "",
-    description: evento.description || evento.descricao || "",
-    status: evento.status || "Publicado",
+
+    description:
+      evento.description || evento.descricao || "",
+
+    status: evento.status || "agendado",
+
+    preco: evento.preco || "",
+
+    imagem: evento.imagem || "",
+
+    link: evento.link || "",
+
+    organizador: evento.organizador || "",
   };
 }
 
+// =========================================
+// FORMATAR DATA
+// =========================================
+
 function formatarData(data) {
   if (!data) return "Data a confirmar";
+
   const partes = data.split("-");
+
   if (partes.length !== 3) return data;
-  return new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]))
-    .toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+
+  return new Date(
+    Number(partes[0]),
+    Number(partes[1]) - 1,
+    Number(partes[2])
+  ).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 }
+
+// =========================================
+// COMPONENTE PRINCIPAL
+// =========================================
 
 function ExploreEvents({
   events = [],
@@ -61,36 +106,101 @@ function ExploreEvents({
   onToggleSaved,
 }) {
   const [busca, setBusca] = useState("");
-  const [eventoSelecionado, setEventoSelecionado] = useState(null);
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
-  const [eventosDoCatalogo] = useState(lerEventosDoCatalogo);
+
+  const [eventoSelecionado, setEventoSelecionado] =
+    useState(null);
+
+  const [categoriaSelecionada, setCategoriaSelecionada] =
+    useState("Todas");
+
+  const [eventosDoCatalogo, setEventosDoCatalogo] =
+    useState([]);
+
+  const [carregando, setCarregando] = useState(true);
+
+  const [erroCarregamento, setErroCarregamento] =
+    useState(false);
+
+  // =========================================
+  // BUSCAR EVENTOS DO MONGODB
+  // =========================================
+
+  useEffect(() => {
+    async function carregarEventos() {
+      try {
+        const resposta = await fetch(API_URL);
+
+        if (!resposta.ok) {
+          throw new Error("Erro ao buscar eventos.");
+        }
+
+        const dados = await resposta.json();
+
+        setEventosDoCatalogo(
+          dados.map(normalizarEvento)
+        );
+
+        setErroCarregamento(false);
+      } catch (error) {
+        console.error(
+          "Erro ao carregar eventos do catálogo:",
+          error
+        );
+
+        setErroCarregamento(true);
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregarEventos();
+  }, []);
+
+  // =========================================
+  // JUNTAR EVENTOS E REMOVER DUPLICADOS
+  // =========================================
 
   const eventos = useMemo(() => {
-    const todos = [...events, ...eventosDoCatalogo]
-      .filter((evento) => {
-        const status = String(evento.status || "").toLowerCase();
-        return status !== "cancelado" &&
-          status !== "inativo" &&
-          status !== "pendente";
-      })
-      .map(normalizarEvento);
+    const todos = [
+      ...events.map(normalizarEvento),
+      ...eventosDoCatalogo,
+    ].filter((evento) => {
+      const status = String(
+        evento.status || ""
+      ).toLowerCase();
+
+      return (
+        status !== "cancelado" &&
+        status !== "inativo" &&
+        status !== "pendente"
+      );
+    });
 
     const unicos = new Map();
+
     todos.forEach((evento) => {
       const chave = [
         evento.title.trim().toLowerCase(),
         evento.date,
         evento.location.trim().toLowerCase(),
       ].join("|");
-      if (!unicos.has(chave)) unicos.set(chave, evento);
+
+      if (!unicos.has(chave)) {
+        unicos.set(chave, evento);
+      }
     });
 
     return [...unicos.values()].sort((a, b) => {
       if (!a.date) return 1;
       if (!b.date) return -1;
+
       return a.date.localeCompare(b.date);
     });
   }, [events, eventosDoCatalogo]);
+
+  // =========================================
+  // PESQUISAR E FILTRAR EVENTOS
+  // =========================================
 
   const eventosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -98,7 +208,8 @@ function ExploreEvents({
     return eventos.filter((evento) => {
       const combinaCategoria =
         categoriaSelecionada === "Todas" ||
-        evento.category.toUpperCase() === categoriaSelecionada;
+        evento.category.toUpperCase() ===
+          categoriaSelecionada;
 
       const texto = [
         evento.title,
@@ -107,21 +218,54 @@ function ExploreEvents({
         evento.address,
         evento.city,
         evento.description,
-      ].join(" ").toLowerCase();
+      ]
+        .join(" ")
+        .toLowerCase();
 
-      return combinaCategoria && (!termo || texto.includes(termo));
+      return (
+        combinaCategoria &&
+        (!termo || texto.includes(termo))
+      );
     });
   }, [eventos, busca, categoriaSelecionada]);
 
+  // =========================================
+  // VERIFICAR EVENTOS SALVOS
+  // =========================================
+
+  function eventoEstaSalvo(evento) {
+    return savedEvents.some(
+      (item) =>
+        String(item.id ?? item._id) ===
+        String(evento.id)
+    );
+  }
+
+  // =========================================
+  // RENDERIZAÇÃO
+  // =========================================
+
   return (
     <main className="explore-page">
+
+      {/* CABEÇALHO */}
+
       <header className="explore-header">
+
         <div className="explore-header-top">
+
           <div>
-            <span className="explore-eyebrow">ARTISMAP • CULTURA AO SEU REDOR</span>
+            <span className="explore-eyebrow">
+              ARTISMAP • CULTURA AO SEU REDOR
+            </span>
+
             <h1>Explore eventos</h1>
-            <p>Descubra o que está acontecendo na sua cidade.</p>
+
+            <p>
+              Descubra o que está acontecendo na sua cidade.
+            </p>
           </div>
+
           <button
             type="button"
             className="explore-profile-button"
@@ -129,162 +273,479 @@ function ExploreEvents({
             aria-label="Abrir perfil"
           >
             {fotoPerfil ? (
-              <img src={fotoPerfil} alt="Foto de perfil" />
+              <img
+                src={fotoPerfil}
+                alt="Foto de perfil"
+              />
             ) : (
               "👤"
             )}
           </button>
+
         </div>
 
+        {/* PESQUISA */}
+
         <label className="explore-search">
+
           <span aria-hidden="true">⌕</span>
+
           <input
             type="search"
             value={busca}
-            onChange={(event) => setBusca(event.target.value)}
+            onChange={(event) =>
+              setBusca(event.target.value)
+            }
             placeholder="Buscar evento, categoria ou local..."
             aria-label="Buscar eventos"
           />
+
         </label>
 
-        <div className="explore-filters" aria-label="Filtrar por categoria">
+        {/* FILTROS */}
+
+        <div
+          className="explore-filters"
+          aria-label="Filtrar por categoria"
+        >
+
           {categorias.map((categoria) => (
             <button
               type="button"
               key={categoria}
-              className={categoriaSelecionada === categoria ? "selected" : ""}
-              onClick={() => setCategoriaSelecionada(categoria)}
+              className={
+                categoriaSelecionada === categoria
+                  ? "selected"
+                  : ""
+              }
+              onClick={() =>
+                setCategoriaSelecionada(categoria)
+              }
             >
-              {categoria === "Todas" ? "Todos" : categoria}
+              {categoria === "Todas"
+                ? "Todos"
+                : categoria}
             </button>
           ))}
+
         </div>
+
       </header>
 
+      {/* CONTEÚDO */}
+
       <section className="explore-content">
+
+        {/* TÍTULO DA LISTA */}
+
         <div className="explore-list-heading">
+
           <div>
             <span>AGENDA CULTURAL</span>
+
             <h2>Eventos disponíveis</h2>
           </div>
-          <strong>{eventosFiltrados.length} {eventosFiltrados.length === 1 ? "evento" : "eventos"}</strong>
+
+          <strong>
+            {eventosFiltrados.length}{" "}
+            {eventosFiltrados.length === 1
+              ? "evento"
+              : "eventos"}
+          </strong>
+
         </div>
 
-        {eventosFiltrados.length === 0 ? (
+        {/* CARREGAMENTO */}
+
+        {carregando ? (
+
           <div className="explore-empty">
             <span>✦</span>
-            <h3>Nenhum evento encontrado</h3>
-            <p>Tente mudar a pesquisa ou selecionar outra categoria.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setBusca("");
-                setCategoriaSelecionada("Todas");
-              }}
-            >
-              Limpar filtros
-            </button>
+            <h3>Carregando eventos...</h3>
+            <p>
+              Estamos buscando os eventos culturais.
+            </p>
           </div>
+
         ) : (
-          <div className="explore-event-list">
-            {eventosFiltrados.map((evento) => (
-              <article className="explore-event-card explore-event-card-clickable" key={evento.id} role="button" tabIndex={0} onClick={() => setEventoSelecionado(evento)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setEventoSelecionado(evento); } }}>
-                {evento.imagem && (
-                  <img
-                    className="explore-event-image"
-                    src={evento.imagem}
-                    alt={evento.title}
-                  />
-                )}
-                <div className="explore-event-body">
-                  <div className="explore-event-top">
-                    <span className="explore-category">{evento.category}</span>
-                    <span className="explore-available">Disponível</span>
-                  </div>
 
-                  <div className="explore-event-title-row">
-                    <h3>{evento.title}</h3>
-                    <button
-                      type="button"
-                      className={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "explore-save-button is-saved" : "explore-save-button"}
-                      onClick={(event) => { event.stopPropagation(); onToggleSaved?.(evento); }}
-                      aria-label={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "Remover dos salvos" : "Salvar nos favoritos"}
-                      title={savedEvents.some((item) => String(item.id) === String(evento.id)) ? "Remover dos salvos" : "Salvar evento"}
-                    >
-                      {savedEvents.some((item) => String(item.id) === String(evento.id)) ? "♥" : "♡"}
-                    </button>
-                  </div>
-                  {evento.description && <p className="explore-description">{evento.description}</p>}
+          <>
 
-                  <div className="explore-event-info">
-                    <p><span>▦</span><strong>Data:</strong> {formatarData(evento.date)}</p>
-                    {evento.time && <p><span>◷</span><strong>Horário:</strong> {evento.time}</p>}
-                    <p>
-                      <span>⌖</span>
-                      <strong>Local:</strong>
-                      {[evento.location, evento.address, evento.city].filter(Boolean).join(" • ") || "Local a confirmar"}
-                    </p>
-                    {evento.preco && <p><span>R$</span><strong>Entrada:</strong> {evento.preco}</p>}
-                  </div>
+            {/* ERRO DE CONEXÃO */}
 
-                  {evento.link && (
-                    <a
-                      className="explore-event-link"
-                      href={evento.link}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Mais informações ↗
-                    </a>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
+            {erroCarregamento && eventos.length === 0 && (
+              <div className="explore-empty">
+                <span>✦</span>
+
+                <h3>Não foi possível carregar os eventos</h3>
+
+                <p>
+                  Verifique se o servidor está funcionando
+                  e tente atualizar a página.
+                </p>
+              </div>
+            )}
+
+            {/* LISTA VAZIA */}
+
+            {eventosFiltrados.length === 0 &&
+            !(erroCarregamento && eventos.length === 0) ? (
+
+              <div className="explore-empty">
+
+                <span>✦</span>
+
+                <h3>Nenhum evento encontrado</h3>
+
+                <p>
+                  Tente mudar a pesquisa ou selecionar
+                  outra categoria.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBusca("");
+                    setCategoriaSelecionada("Todas");
+                  }}
+                >
+                  Limpar filtros
+                </button>
+
+              </div>
+
+            ) : (
+
+              /* CARDS DOS EVENTOS */
+
+              <div className="explore-event-list">
+
+                {eventosFiltrados.map((evento) => (
+
+                  <article
+                    className="explore-event-card explore-event-card-clickable"
+                    key={evento.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      setEventoSelecionado(evento)
+                    }
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                      ) {
+                        event.preventDefault();
+                        setEventoSelecionado(evento);
+                      }
+                    }}
+                  >
+
+                    {evento.imagem && (
+                      <img
+                        className="explore-event-image"
+                        src={evento.imagem}
+                        alt={evento.title}
+                      />
+                    )}
+
+                    <div className="explore-event-body">
+
+                      <div className="explore-event-top">
+
+                        <span className="explore-category">
+                          {evento.category}
+                        </span>
+
+                        <span className="explore-available">
+                          Disponível
+                        </span>
+
+                      </div>
+
+                      <div className="explore-event-title-row">
+
+                        <h3>{evento.title}</h3>
+
+                        <button
+                          type="button"
+                          className={
+                            eventoEstaSalvo(evento)
+                              ? "explore-save-button is-saved"
+                              : "explore-save-button"
+                          }
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onToggleSaved?.(evento);
+                          }}
+                          aria-label={
+                            eventoEstaSalvo(evento)
+                              ? "Remover dos salvos"
+                              : "Salvar nos favoritos"
+                          }
+                          title={
+                            eventoEstaSalvo(evento)
+                              ? "Remover dos salvos"
+                              : "Salvar evento"
+                          }
+                        >
+                          {eventoEstaSalvo(evento)
+                            ? "♥"
+                            : "♡"}
+                        </button>
+
+                      </div>
+
+                      {evento.description && (
+                        <p className="explore-description">
+                          {evento.description}
+                        </p>
+                      )}
+
+                      {/* INFORMAÇÕES */}
+
+                      <div className="explore-event-info">
+
+                        <p>
+                          <span>▦</span>
+                          <strong>Data:</strong>{" "}
+                          {formatarData(evento.date)}
+                        </p>
+
+                        {evento.time && (
+                          <p>
+                            <span>◷</span>
+                            <strong>Horário:</strong>{" "}
+                            {evento.time}
+                          </p>
+                        )}
+
+                        <p>
+                          <span>⌖</span>
+                          <strong>Local:</strong>{" "}
+                          {[
+                            evento.location,
+                            evento.address,
+                            evento.city,
+                          ]
+                            .filter(Boolean)
+                            .join(" • ") ||
+                            "Local a confirmar"}
+                        </p>
+
+                        {evento.preco && (
+                          <p>
+                            <span>R$</span>
+                            <strong>Entrada:</strong>{" "}
+                            {evento.preco}
+                          </p>
+                        )}
+
+                      </div>
+
+                      {/* LINK DO EVENTO */}
+
+                      {evento.link && (
+                        <a
+                          className="explore-event-link"
+                          href={evento.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(event) =>
+                            event.stopPropagation()
+                          }
+                        >
+                          Mais informações ↗
+                        </a>
+                      )}
+
+                    </div>
+
+                  </article>
+
+                ))}
+
+              </div>
+
+            )}
+
+          </>
+
         )}
+
       </section>
 
+      {/* MODAL DE DETALHES */}
+
       {eventoSelecionado && (
-        <div className="explore-modal-overlay" onClick={() => setEventoSelecionado(null)}>
-          <section className="explore-event-modal" role="dialog" aria-modal="true" aria-labelledby="explore-modal-title" onClick={(event) => event.stopPropagation()}>
-            <button type="button" className="explore-modal-close" aria-label="Fechar detalhes" onClick={() => setEventoSelecionado(null)}>×</button>
-            {eventoSelecionado.imagem && <img className="explore-modal-image" src={eventoSelecionado.imagem} alt={eventoSelecionado.title} />}
-            <span className="explore-category">{eventoSelecionado.category}</span>
-            <h2 id="explore-modal-title">{eventoSelecionado.title}</h2>
-            {eventoSelecionado.description && <p className="explore-modal-description">{eventoSelecionado.description}</p>}
+
+        <div
+          className="explore-modal-overlay"
+          onClick={() =>
+            setEventoSelecionado(null)
+          }
+        >
+
+          <section
+            className="explore-event-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="explore-modal-title"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <button
+              type="button"
+              className="explore-modal-close"
+              aria-label="Fechar detalhes"
+              onClick={() =>
+                setEventoSelecionado(null)
+              }
+            >
+              ×
+            </button>
+
+            {eventoSelecionado.imagem && (
+              <img
+                className="explore-modal-image"
+                src={eventoSelecionado.imagem}
+                alt={eventoSelecionado.title}
+              />
+            )}
+
+            <span className="explore-category">
+              {eventoSelecionado.category}
+            </span>
+
+            <h2 id="explore-modal-title">
+              {eventoSelecionado.title}
+            </h2>
+
+            {eventoSelecionado.description && (
+              <p className="explore-modal-description">
+                {eventoSelecionado.description}
+              </p>
+            )}
+
             <div className="explore-modal-info">
-              <p><strong>Data:</strong> {formatarData(eventoSelecionado.date)}</p>
-              {eventoSelecionado.time && <p><strong>Horário:</strong> {eventoSelecionado.time}</p>}
-              {eventoSelecionado.location && <p><strong>Local:</strong> {eventoSelecionado.location}</p>}
-              {eventoSelecionado.address && <p><strong>Endereço:</strong> {eventoSelecionado.address}</p>}
-              {eventoSelecionado.city && <p><strong>Cidade:</strong> {eventoSelecionado.city}</p>}
-              {eventoSelecionado.preco && <p><strong>Entrada:</strong> {eventoSelecionado.preco}</p>}
-              {eventoSelecionado.organizador && <p><strong>Organização:</strong> {eventoSelecionado.organizador}</p>}
+
+              <p>
+                <strong>Data:</strong>{" "}
+                {formatarData(eventoSelecionado.date)}
+              </p>
+
+              {eventoSelecionado.time && (
+                <p>
+                  <strong>Horário:</strong>{" "}
+                  {eventoSelecionado.time}
+                </p>
+              )}
+
+              {eventoSelecionado.location && (
+                <p>
+                  <strong>Local:</strong>{" "}
+                  {eventoSelecionado.location}
+                </p>
+              )}
+
+              {eventoSelecionado.address && (
+                <p>
+                  <strong>Endereço:</strong>{" "}
+                  {eventoSelecionado.address}
+                </p>
+              )}
+
+              {eventoSelecionado.city && (
+                <p>
+                  <strong>Cidade:</strong>{" "}
+                  {eventoSelecionado.city}
+                </p>
+              )}
+
+              {eventoSelecionado.preco && (
+                <p>
+                  <strong>Entrada:</strong>{" "}
+                  {eventoSelecionado.preco}
+                </p>
+              )}
+
+              {eventoSelecionado.organizador && (
+                <p>
+                  <strong>Organização:</strong>{" "}
+                  {eventoSelecionado.organizador}
+                </p>
+              )}
+
             </div>
-            {eventoSelecionado.link && <a className="explore-event-link" href={eventoSelecionado.link} target="_blank" rel="noreferrer">Acessar página do evento ↗</a>}
-            <button type="button" className="explore-modal-done" onClick={() => setEventoSelecionado(null)}>Fechar detalhes</button>
+
+            {eventoSelecionado.link && (
+              <a
+                className="explore-event-link"
+                href={eventoSelecionado.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Acessar página do evento ↗
+              </a>
+            )}
+
+            <button
+              type="button"
+              className="explore-modal-done"
+              onClick={() =>
+                setEventoSelecionado(null)
+              }
+            >
+              Fechar detalhes
+            </button>
+
           </section>
+
         </div>
+
       )}
 
+      {/* NAVBAR */}
+
       <nav className="bottom-navigation explore-navigation">
-        <button type="button" className="active" aria-current="page">
+
+        <button
+          type="button"
+          className="active"
+          aria-current="page"
+        >
           <span>⌂</span>
           <small>Explorar</small>
         </button>
-        <button type="button" onClick={onOpenMap}>
+
+        <button
+          type="button"
+          onClick={onOpenMap}
+        >
           <span>⌖</span>
           <small>Mapa</small>
         </button>
-        <button type="button" onClick={onOpenSaved}>
+
+        <button
+          type="button"
+          onClick={onOpenSaved}
+        >
           <span>♡</span>
           <small>Salvos</small>
         </button>
-        <button type="button" onClick={onOpenAgenda}>
+
+        <button
+          type="button"
+          onClick={onOpenAgenda}
+        >
           <span>▦</span>
           <small>Agenda</small>
         </button>
+
       </nav>
+
     </main>
   );
 }

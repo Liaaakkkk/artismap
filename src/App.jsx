@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 
 import Calendar from "./components/Calendar";
 import EventCard from "./components/EventCard";
@@ -26,9 +27,11 @@ import culturalPoints from "./data/culturalPoints";
 
 import "./App.css";
 
+const API_EVENTOS = "http://localhost:3001/api/eventos";
+
 /*
 |--------------------------------------------------------------------------
-| Eventos iniciais da agenda
+| Eventos iniciais de demonstração
 |--------------------------------------------------------------------------
 */
 
@@ -41,7 +44,6 @@ const initialEvents = [
     time: "14:00",
     location: "Beco das Artes",
   },
-
   {
     id: 2,
     title: "Festival de Música",
@@ -50,7 +52,6 @@ const initialEvents = [
     time: "19:00",
     location: "Centro Cultural",
   },
-
   {
     id: 3,
     title: "Exposição Nordeste",
@@ -59,7 +60,6 @@ const initialEvents = [
     time: "10:00",
     location: "Museu da Cultura",
   },
-
   {
     id: 4,
     title: "Sarau Cultural",
@@ -68,7 +68,6 @@ const initialEvents = [
     time: "18:30",
     location: "Biblioteca Central",
   },
-
   {
     id: 5,
     title: "Cinema ao Ar Livre",
@@ -78,6 +77,111 @@ const initialEvents = [
     location: "Praça Cultural",
   },
 ];
+
+/*
+|--------------------------------------------------------------------------
+| Normalização de categorias
+|--------------------------------------------------------------------------
+*/
+
+function normalizarCategoria(categoria) {
+  return String(categoria || "outros")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+/*
+|--------------------------------------------------------------------------
+| Normalização dos eventos vindos do MongoDB
+|--------------------------------------------------------------------------
+*/
+
+function normalizarEvento(evento) {
+  return {
+    id: String(evento._id || evento.id),
+
+    title:
+      evento.titulo ||
+      evento.title ||
+      "Evento sem título",
+
+    category:
+      evento.categoria ||
+      evento.category ||
+      "OUTROS",
+
+    date: String(
+      evento.data || evento.date || ""
+    ).slice(0, 10),
+
+    time:
+      evento.horario ||
+      evento.time ||
+      "",
+
+    location:
+      evento.local ||
+      evento.location ||
+      "",
+
+    address:
+      evento.endereco ||
+      evento.address ||
+      "",
+
+    city:
+      evento.cidade ||
+      evento.city ||
+      "Fortaleza",
+
+    description:
+      evento.descricao ||
+      evento.description ||
+      "",
+
+    status: String(
+      evento.status || "agendado"
+    ).toLowerCase(),
+
+    preco:
+      evento.preco ||
+      evento.price ||
+      "",
+
+    price:
+      evento.preco ||
+      evento.price ||
+      "Não informado",
+
+    imagem:
+      evento.imagem ||
+      "",
+
+    link:
+      evento.link ||
+      "",
+
+    organizador:
+      evento.organizador ||
+      "",
+
+    // Coordenadas utilizadas pelo mapa
+    latitude:
+      evento.latitude == null
+        ? null
+        : Number(evento.latitude),
+
+    longitude:
+      evento.longitude == null
+        ? null
+        : Number(evento.longitude),
+
+    type: "evento",
+  };
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -92,9 +196,7 @@ function App() {
   |--------------------------------------------------------------------------
   */
 
-  const [usuario, setUsuario] = useState(() =>
-    obterUsuario()
-  );
+  const [usuario, setUsuario] = useState(() => obterUsuario());
 
   /*
   |--------------------------------------------------------------------------
@@ -125,11 +227,9 @@ function App() {
   const [selectedCategory, setSelectedCategory] =
     useState("todos");
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [userLocation, setUserLocation] =
-    useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   /*
   |--------------------------------------------------------------------------
@@ -137,21 +237,99 @@ function App() {
   |--------------------------------------------------------------------------
   */
 
-  const [currentDate, setCurrentDate] =
-    useState(new Date(2026, 8, 15));
+  const [currentDate, setCurrentDate] = useState(
+    () => new Date()
+  );
 
-  const [selectedDate, setSelectedDate] =
-    useState(new Date(2026, 8, 15));
+  const [selectedDate, setSelectedDate] = useState(
+    () => new Date()
+  );
 
   /*
   |--------------------------------------------------------------------------
-  | Produtor
+  | Eventos vindos do MongoDB
+  |--------------------------------------------------------------------------
+  */
+
+  const [apiEvents, setApiEvents] = useState([]);
+
+  const [loadingEvents, setLoadingEvents] = useState(false);
+
+  useEffect(() => {
+    if (
+      telaAtual !== "agenda" &&
+      telaAtual !== "explorar"
+    ) {
+      return;
+    }
+
+    let ativo = true;
+
+    async function buscarEventos() {
+      try {
+        setLoadingEvents(true);
+
+        const resposta = await fetch(API_EVENTOS);
+
+        if (!resposta.ok) {
+          throw new Error(
+            "Não foi possível buscar os eventos."
+          );
+        }
+
+        const dados = await resposta.json();
+
+        if (!Array.isArray(dados)) {
+          throw new Error(
+            "A resposta da API não possui uma lista de eventos."
+          );
+        }
+
+        const eventosNormalizados = dados
+          .map(normalizarEvento)
+          .filter((evento) => {
+            return (
+              evento.date &&
+              ![
+                "inativo",
+                "cancelado",
+                "pendente",
+              ].includes(evento.status)
+            );
+          });
+
+        if (ativo) {
+          setApiEvents(eventosNormalizados);
+        }
+      } catch (erro) {
+        console.error(
+          "Erro ao carregar eventos:",
+          erro
+        );
+      } finally {
+        if (ativo) {
+          setLoadingEvents(false);
+        }
+      }
+    }
+
+    buscarEventos();
+
+    return () => {
+      ativo = false;
+    };
+  }, [telaAtual]);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Dados do produtor
   |--------------------------------------------------------------------------
   */
 
   const [producer, setProducer] = useState(() => {
-    const savedProducer =
-      localStorage.getItem("artismap-producer");
+    const savedProducer = localStorage.getItem(
+      "artismap-producer"
+    );
 
     if (!savedProducer) {
       return null;
@@ -164,61 +342,96 @@ function App() {
     }
   });
 
-  const [producerEvents, setProducerEvents] =
-    useState(() => {
-      const savedEvents =
-        localStorage.getItem(
-          "artismap-producer-events"
-        );
-
-      if (!savedEvents) {
-        return [];
-      }
-
-      try {
-        return JSON.parse(savedEvents);
-      } catch {
-        return [];
-      }
-    });
-
-  /*
-  |--------------------------------------------------------------------------
-  | Eventos
-  |--------------------------------------------------------------------------
-  */
-
-  const [events, setEvents] = useState(() => {
-    const savedEvents =
-      localStorage.getItem(
-        "artismap-producer-events"
-      );
+  const [producerEvents, setProducerEvents] = useState(() => {
+    const savedEvents = localStorage.getItem(
+      "artismap-producer-events"
+    );
 
     if (!savedEvents) {
-      return initialEvents;
+      return [];
     }
 
     try {
-      const saved = JSON.parse(savedEvents);
-
-      const published = saved.filter(
-        (event) =>
-          event.status === "Publicado"
-      );
-
-      return [
-        ...initialEvents,
-        ...published,
-      ];
+      return JSON.parse(savedEvents);
     } catch {
-      return initialEvents;
+      return [];
     }
   });
 
+  /*
+  |--------------------------------------------------------------------------
+  | Lista geral de eventos
+  |--------------------------------------------------------------------------
+  */
+
+  const events = useMemo(() => {
+    const publishedProducerEvents = producerEvents
+      .filter(
+        (event) => event.status === "Publicado"
+      )
+      .map((event) => ({
+        ...event,
+
+        id: String(event.id),
+
+        title:
+          event.title ||
+          event.titulo,
+
+        category:
+          event.category ||
+          event.categoria,
+
+        date: String(
+          event.date ||
+          event.data ||
+          ""
+        ).slice(0, 10),
+
+        time:
+          event.time ||
+          event.horario ||
+          "",
+
+        location:
+          event.location ||
+          event.local ||
+          "",
+
+        latitude:
+          event.latitude == null
+            ? null
+            : Number(event.latitude),
+
+        longitude:
+          event.longitude == null
+            ? null
+            : Number(event.longitude),
+      }));
+
+    return [
+      ...initialEvents,
+      ...apiEvents,
+      ...publishedProducerEvents,
+    ];
+  }, [apiEvents, producerEvents]);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Eventos favoritos
+  |--------------------------------------------------------------------------
+  */
+
   const [savedEvents, setSavedEvents] = useState(() => {
     try {
-      const email = obterUsuario()?.email || "visitante";
-      return JSON.parse(localStorage.getItem(`artismap-favoritos-${email}`) || "[]");
+      const email =
+        obterUsuario()?.email || "visitante";
+
+      return JSON.parse(
+        localStorage.getItem(
+          `artismap-favoritos-${email}`
+        ) || "[]"
+      );
     } catch {
       return [];
     }
@@ -226,39 +439,121 @@ function App() {
 
   function persistirSalvos(lista) {
     setSavedEvents(lista);
+
     const email = usuario?.email || "visitante";
-    localStorage.setItem(`artismap-favoritos-${email}`, JSON.stringify(lista));
+
+    localStorage.setItem(
+      `artismap-favoritos-${email}`,
+      JSON.stringify(lista)
+    );
   }
 
   function toggleSavedEvent(evento) {
     const id = String(evento.id);
-    const jaSalvo = savedEvents.some((item) => String(item.id) === id);
+
+    const jaSalvo = savedEvents.some(
+      (item) => String(item.id) === id
+    );
+
     persistirSalvos(
       jaSalvo
-        ? savedEvents.filter((item) => String(item.id) !== id)
+        ? savedEvents.filter(
+            (item) => String(item.id) !== id
+          )
         : [...savedEvents, evento]
     );
   }
 
   function removerEventoSalvo(eventId) {
-    persistirSalvos(savedEvents.filter((item) => String(item.id) !== String(eventId)));
+    persistirSalvos(
+      savedEvents.filter(
+        (item) =>
+          String(item.id) !== String(eventId)
+      )
+    );
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Filtro do mapa
+  | Pontos do mapa
+  |--------------------------------------------------------------------------
+  */
+
+  const mapPoints = useMemo(() => {
+    // Transforma os eventos em pontos que o mapa consegue exibir.
+    const eventosComLocalizacao = events
+      .filter((event) => {
+        return (
+          Number.isFinite(Number(event.latitude)) &&
+          Number.isFinite(Number(event.longitude)) &&
+          Number(event.latitude) !== 0 &&
+          Number(event.longitude) !== 0
+        );
+      })
+      .map((event) => ({
+        ...event,
+
+        id: String(event.id),
+
+        name:
+          event.title ||
+          event.titulo ||
+          "Evento sem título",
+
+        category: normalizarCategoria(
+          event.category || event.categoria
+        ),
+
+        description:
+          event.description ||
+          event.descricao ||
+          "",
+
+        address:
+          event.address ||
+          event.endereco ||
+          event.location ||
+          "",
+
+        city:
+          event.city ||
+          event.cidade ||
+          "Fortaleza",
+
+        price:
+          event.price ||
+          event.preco ||
+          "Não informado",
+
+        type: "evento",
+      }));
+
+    // Junta os eventos aos pontos culturais já cadastrados.
+    return [
+      ...culturalPoints,
+      ...eventosComLocalizacao,
+    ];
+  }, [events]);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Filtros do mapa
   |--------------------------------------------------------------------------
   */
 
   const filteredPoints = useMemo(() => {
-    const term = searchTerm
-      .trim()
-      .toLowerCase();
+    const term = searchTerm.trim().toLowerCase();
 
-    return culturalPoints.filter((point) => {
+    const categoriaSelecionada =
+      normalizarCategoria(selectedCategory);
+
+    return mapPoints.filter((point) => {
+      const categoriaPonto =
+        normalizarCategoria(point.category);
+
       const categoryMatches =
         selectedCategory === "todos" ||
-        point.category === selectedCategory;
+        categoriaPonto === categoriaSelecionada;
 
       if (!categoryMatches) {
         return false;
@@ -268,26 +563,38 @@ function App() {
         return true;
       }
 
+      const nome = String(
+        point.name || point.title || ""
+      ).toLowerCase();
+
+      const descricao = String(
+        point.description || ""
+      ).toLowerCase();
+
+      const endereco = String(
+        point.address || point.location || ""
+      ).toLowerCase();
+
+      const cidade = String(
+        point.city || ""
+      ).toLowerCase();
+
       return (
-        point.name
-          .toLowerCase()
-          .includes(term) ||
-        point.description
-          .toLowerCase()
-          .includes(term) ||
-        point.address
-          .toLowerCase()
-          .includes(term) ||
-        point.city
-          .toLowerCase()
-          .includes(term)
+        nome.includes(term) ||
+        descricao.includes(term) ||
+        endereco.includes(term) ||
+        cidade.includes(term)
       );
     });
-  }, [selectedCategory, searchTerm]);
+  }, [
+    mapPoints,
+    selectedCategory,
+    searchTerm,
+  ]);
 
   /*
   |--------------------------------------------------------------------------
-  | Eventos selecionados no calendário
+  | Eventos da data selecionada
   |--------------------------------------------------------------------------
   */
 
@@ -305,11 +612,17 @@ function App() {
         selectedDate.getDate()
       ).padStart(2, "0")}`;
 
-    return events.filter(
-      (event) =>
+    return events.filter((event) => {
+      return (
         event.date === dateString &&
-        event.status !== "Cancelado"
-    );
+        ![
+          "inativo",
+          "cancelado",
+          "pendente",
+          "Cancelado",
+        ].includes(event.status)
+      );
+    });
   }, [selectedDate, events]);
 
   /*
@@ -320,8 +633,17 @@ function App() {
 
   function handleLogin(usuarioLogado) {
     setUsuario(usuarioLogado);
+
     try {
-      setSavedEvents(JSON.parse(localStorage.getItem(`artismap-favoritos-${usuarioLogado.email || "visitante"}`) || "[]"));
+      setSavedEvents(
+        JSON.parse(
+          localStorage.getItem(
+            `artismap-favoritos-${
+              usuarioLogado.email || "visitante"
+            }`
+          ) || "[]"
+        )
+      );
     } catch {
       setSavedEvents([]);
     }
@@ -342,8 +664,17 @@ function App() {
 
   function handleCadastro(usuarioCadastrado) {
     setUsuario(usuarioCadastrado);
+
     try {
-      setSavedEvents(JSON.parse(localStorage.getItem(`artismap-favoritos-${usuarioCadastrado.email || "visitante"}`) || "[]"));
+      setSavedEvents(
+        JSON.parse(
+          localStorage.getItem(
+            `artismap-favoritos-${
+              usuarioCadastrado.email || "visitante"
+            }`
+          ) || "[]"
+        )
+      );
     } catch {
       setSavedEvents([]);
     }
@@ -358,29 +689,38 @@ function App() {
 
   /*
   |--------------------------------------------------------------------------
-  | Logout
+  | Foto de perfil
   |--------------------------------------------------------------------------
   */
 
   async function handlePhotoChange(arquivo) {
     if (!usuario?.id) {
-      throw new Error("Faça login novamente para alterar sua foto.");
+      throw new Error(
+        "Faça login novamente para alterar sua foto."
+      );
     }
 
-    const usuarioAtualizado = await atualizarFotoPerfil(
-      usuario.id,
-      arquivo
-    );
+    const usuarioAtualizado =
+      await atualizarFotoPerfil(
+        usuario.id,
+        arquivo
+      );
 
     setUsuario(usuarioAtualizado);
+
     return usuarioAtualizado;
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Logout
+  |--------------------------------------------------------------------------
+  */
 
   function handleLogout() {
     logoutUsuario();
 
     setUsuario(null);
-
     setTelaAtual("login");
   }
 
@@ -405,9 +745,7 @@ function App() {
   |--------------------------------------------------------------------------
   */
 
-  function saveProducerEvents(
-    updatedEvents
-  ) {
+  function saveProducerEvents(updatedEvents) {
     setProducerEvents(updatedEvents);
 
     localStorage.setItem(
@@ -418,28 +756,7 @@ function App() {
 
   /*
   |--------------------------------------------------------------------------
-  | Atualizar agenda
-  |--------------------------------------------------------------------------
-  */
-
-  function refreshPublishedEvents(
-    producerEventList
-  ) {
-    const publishedEvents =
-      producerEventList.filter(
-        (event) =>
-          event.status === "Publicado"
-      );
-
-    setEvents([
-      ...initialEvents,
-      ...publishedEvents,
-    ]);
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Adicionar evento
+  | Adicionar evento do produtor
   |--------------------------------------------------------------------------
   */
 
@@ -450,90 +767,70 @@ function App() {
     ];
 
     saveProducerEvents(updatedEvents);
-
-    refreshPublishedEvents(
-      updatedEvents
-    );
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Atualizar evento
+  | Atualizar evento do produtor
   |--------------------------------------------------------------------------
   */
 
-  function handleUpdateEvent(
-    updatedEvent
-  ) {
-    const updatedEvents =
-      producerEvents.map((event) =>
-        event.id === updatedEvent.id
+  function handleUpdateEvent(updatedEvent) {
+    const updatedEvents = producerEvents.map(
+      (event) =>
+        String(event.id) === String(updatedEvent.id)
           ? updatedEvent
           : event
-      );
+    );
 
     saveProducerEvents(updatedEvents);
-
-    refreshPublishedEvents(
-      updatedEvents
-    );
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Cancelar evento
+  | Cancelar evento do produtor
   |--------------------------------------------------------------------------
   */
 
   function handleCancelEvent(eventId) {
-    const updatedEvents =
-      producerEvents.map((event) =>
-        event.id === eventId
+    const updatedEvents = producerEvents.map(
+      (event) =>
+        String(event.id) === String(eventId)
           ? {
               ...event,
               status: "Cancelado",
-              cancelledAt:
-                new Date().toISOString(),
+              cancelledAt: new Date().toISOString(),
             }
           : event
-      );
+    );
 
     saveProducerEvents(updatedEvents);
-
-    refreshPublishedEvents(
-      updatedEvents
-    );
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Aprovar evento
+  | Aprovar evento do produtor
   |--------------------------------------------------------------------------
   */
 
   function handleApproveEvent(eventId) {
-    const updatedEvents =
-      producerEvents.map((event) =>
-        event.id === eventId
+    const updatedEvents = producerEvents.map(
+      (event) =>
+        String(event.id) === String(eventId)
           ? {
               ...event,
               status: "Publicado",
-              approvedAt:
-                new Date().toISOString(),
+              approvedAt: new Date().toISOString(),
             }
           : event
-      );
+    );
 
     saveProducerEvents(updatedEvents);
-
-    refreshPublishedEvents(
-      updatedEvents
-    );
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Calendário
+  | Navegação do calendário
   |--------------------------------------------------------------------------
   */
 
@@ -561,10 +858,8 @@ function App() {
     setSelectedDate(date);
 
     if (
-      date.getMonth() !==
-        currentDate.getMonth() ||
-      date.getFullYear() !==
-        currentDate.getFullYear()
+      date.getMonth() !== currentDate.getMonth() ||
+      date.getFullYear() !== currentDate.getFullYear()
     ) {
       setCurrentDate(
         new Date(
@@ -600,7 +895,7 @@ function App() {
   function handleEventClick(event) {
     alert(
       `Evento selecionado: ${event.title}\n\n` +
-        "Esta ação será conectada à página completa do evento no PB04."
+      "Esta ação será conectada à página completa do evento no PB04."
     );
   }
 
@@ -645,18 +940,18 @@ function App() {
   */
 
   if (telaAtual === "produtor") {
-    /*
-    Segurança no frontend:
-    somente usuário com tipo produtor
-    pode abrir essa tela.
-    */
-
     if (
       !usuario ||
       usuario.tipo !== "produtor"
     ) {
-      setTelaAtual("mapa");
-      return null;
+      return (
+        <Login
+          onLogin={handleLogin}
+          onCriarConta={() =>
+            setTelaAtual("cadastro")
+          }
+        />
+      );
     }
 
     return (
@@ -664,20 +959,12 @@ function App() {
         usuario={usuario}
         onPhotoChange={handlePhotoChange}
         producer={producer}
-        onProducerSave={
-          handleProducerSave
-        }
+        onProducerSave={handleProducerSave}
         events={producerEvents}
         onAddEvent={handleAddEvent}
-        onUpdateEvent={
-          handleUpdateEvent
-        }
-        onCancelEvent={
-          handleCancelEvent
-        }
-        onApproveEvent={
-          handleApproveEvent
-        }
+        onUpdateEvent={handleUpdateEvent}
+        onCancelEvent={handleCancelEvent}
+        onApproveEvent={handleApproveEvent}
         onBack={() =>
           setTelaAtual("explorar")
         }
@@ -685,15 +972,27 @@ function App() {
     );
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | EVENTOS SALVOS
+  |--------------------------------------------------------------------------
+  */
+
   if (telaAtual === "salvos") {
     return (
       <SavedEvents
         events={savedEvents}
         fotoPerfil={usuario?.fotoPerfil}
         onRemove={removerEventoSalvo}
-        onOpenExplore={() => setTelaAtual("explorar")}
-        onOpenMap={() => setTelaAtual("mapa")}
-        onOpenProfile={() => setTelaAtual("perfil")}
+        onOpenExplore={() =>
+          setTelaAtual("explorar")
+        }
+        onOpenMap={() =>
+          setTelaAtual("mapa")
+        }
+        onOpenProfile={() =>
+          setTelaAtual("perfil")
+        }
       />
     );
   }
@@ -709,7 +1008,9 @@ function App() {
       <UserProfile
         usuario={usuario}
         onPhotoChange={handlePhotoChange}
-        onBack={() => setTelaAtual("explorar")}
+        onBack={() =>
+          setTelaAtual("explorar")
+        }
         onLogout={handleLogout}
       />
     );
@@ -738,10 +1039,7 @@ function App() {
 
           <div>
             <h1>Agenda</h1>
-
-            <p>
-              Eventos culturais do mês
-            </p>
+            <p>Eventos culturais do mês</p>
           </div>
 
           <div className="top-bar-actions">
@@ -754,15 +1052,23 @@ function App() {
             >
               Catálogo
             </button>
+
             <button
               type="button"
               className="profile-button"
               aria-label="Abrir perfil"
-              onClick={() => setTelaAtual("perfil")}
+              onClick={() =>
+                setTelaAtual("perfil")
+              }
             >
               {usuario?.fotoPerfil ? (
-                <img src={usuario.fotoPerfil} alt="Foto de perfil" />
-              ) : "👤"}
+                <img
+                  src={usuario.fotoPerfil}
+                  alt="Foto de perfil"
+                />
+              ) : (
+                "👤"
+              )}
             </button>
           </div>
         </header>
@@ -772,18 +1078,18 @@ function App() {
           selectedDate={selectedDate}
           events={events}
           onDateChange={handleDateChange}
-          onPreviousMonth={
-            handlePreviousMonth
-          }
-          onNextMonth={
-            handleNextMonth
-          }
+          onPreviousMonth={handlePreviousMonth}
+          onNextMonth={handleNextMonth}
         />
 
         <section className="events-section">
           <p className="selected-date">
             {formatSelectedDate()}
           </p>
+
+          {loadingEvents && (
+            <p>Carregando eventos...</p>
+          )}
 
           {selectedEvents.length > 0 ? (
             selectedEvents.map((event) => (
@@ -796,12 +1102,13 @@ function App() {
               />
             ))
           ) : (
-            <div className="empty-state">
-              <p>
-                Nenhum evento encontrado nesta
-                data.
-              </p>
-            </div>
+            !loadingEvents && (
+              <div className="empty-state">
+                <p>
+                  Nenhum evento encontrado nesta data.
+                </p>
+              </div>
+            )
           )}
         </section>
 
@@ -818,7 +1125,9 @@ function App() {
 
           <button
             type="button"
-            onClick={() => setTelaAtual("salvos")}
+            onClick={() =>
+              setTelaAtual("salvos")
+            }
           >
             <span>♡</span>
             <small>Salvos</small>
@@ -848,7 +1157,9 @@ function App() {
     return (
       <CatalogoEventos
         usuario={usuario}
-        onOpenProfile={() => setTelaAtual("perfil")}
+        onOpenProfile={() =>
+          setTelaAtual("perfil")
+        }
         onVoltar={() =>
           setTelaAtual("agenda")
         }
@@ -869,10 +1180,18 @@ function App() {
         savedEvents={savedEvents}
         onToggleSaved={toggleSavedEvent}
         fotoPerfil={usuario?.fotoPerfil}
-        onOpenMap={() => setTelaAtual("mapa")}
-        onOpenAgenda={() => setTelaAtual("agenda")}
-        onOpenSaved={() => setTelaAtual("salvos")}
-        onOpenProfile={() => setTelaAtual("perfil")}
+        onOpenMap={() =>
+          setTelaAtual("mapa")
+        }
+        onOpenAgenda={() =>
+          setTelaAtual("agenda")
+        }
+        onOpenSaved={() =>
+          setTelaAtual("salvos")
+        }
+        onOpenProfile={() =>
+          setTelaAtual("perfil")
+        }
       />
     );
   }
@@ -912,7 +1231,10 @@ function App() {
             }
           >
             {usuario?.fotoPerfil ? (
-              <img src={usuario.fotoPerfil} alt="Foto de perfil" />
+              <img
+                src={usuario.fotoPerfil}
+                alt="Foto de perfil"
+              />
             ) : (
               "👤"
             )}
@@ -920,17 +1242,12 @@ function App() {
         </div>
 
         <CategoryFilters
-          selectedCategory={
-            selectedCategory
-          }
-          onCategoryChange={
-            setSelectedCategory
-          }
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
         />
 
         <p className="map-hint">
-          Toque em um ícone para ver
-          informações culturais
+          Toque em um ícone para ver informações culturais
         </p>
       </header>
 
@@ -947,9 +1264,7 @@ function App() {
       </div>
 
       <UserLocationButton
-        onLocationFound={
-          setUserLocation
-        }
+        onLocationFound={setUserLocation}
       />
 
       <nav className="bottom-navigation">
@@ -966,7 +1281,9 @@ function App() {
 
         <button
           type="button"
-          onClick={() => setTelaAtual("salvos")}
+          onClick={() =>
+            setTelaAtual("salvos")
+          }
         >
           <span>♡</span>
           <small>Salvos</small>
