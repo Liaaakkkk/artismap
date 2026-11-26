@@ -89,7 +89,7 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  color: #403252;
+  color: #6f00ff;
 }
 
 .search-container input::placeholder {
@@ -1723,4 +1723,45 @@ html, body, #root {
 .catalog-button:active,
 .catalogo-button:active {
   transform: scale(0.96);
+}
+
+/* Cabeçalho do mapa no roxo padrão do ArtisMap */
+.top-area {
+  background: #392d46 !important;
+}
+
+/* Textos do cabeçalho */
+.top-area .map-hint,
+.top-area .filter-hint {
+  color: #fff3df !important;
+}
+
+/* Botões de filtro */
+.top-area .filter-button {
+  background: #fff3df;
+  color: #392d46;
+}
+
+.top-area .filter-button.active {
+  background: #c4e1e6;
+  color: #392d46;
+}
+
+.explore-screen-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.explore-screen-wrapper .explore-page {
+  width: 100%;
+  max-width: 430px;
+  margin-left: auto;
+  margin-right: auto;
+  flex-shrink: 0;
 }

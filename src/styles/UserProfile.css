@@ -171,10 +171,16 @@
 
 .profile-page {
   width: 100%;
+  max-width: 430px;
   min-height: 100vh;
   height: auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 25px 20px 40px;
+  padding: 25px 20px 110px;
+  margin: 0 auto;
   box-sizing: border-box;
+}
+
+.profile-page .logout-button {
+  margin-bottom: 100px;
 }
