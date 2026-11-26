@@ -1562,25 +1562,7 @@ html, body, #root {
 }
 
 
-/* CORREÇÃO DEFINITIVA: área do produtor com navegação no rodapé */
-.producer-area {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 430px;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 0;
-  margin: 0 auto;
-  padding: 0;
-  overflow: hidden;
-  background: #efeaff;
-}
 
-.producer-header {
-  flex: 0 0 auto;
-  background: #564787 !important;
-}
 
 .producer-header h1,
 .producer-header p {
@@ -1601,22 +1583,6 @@ html, body, #root {
   overscroll-behavior: contain;
 }
 
-.producer-navigation {
-  position: relative !important;
-  inset: auto !important;
-  left: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-  width: 100%;
-  max-width: none;
-  height: 68px;
-  min-height: 68px;
-  flex: 0 0 68px;
-  margin: 0;
-  z-index: 1000;
-  background: #fff3df;
-  border-top: 1px solid rgba(64, 50, 82, 0.1);
-}
 
 /* =========================================
    NAVBAR ÚNICA E FIXA EM TODAS AS TELAS
@@ -1723,4 +1689,167 @@ html, body, #root {
 .catalog-button:active,
 .catalogo-button:active {
   transform: scale(0.96);
+}
+
+/* =========================================
+   AJUSTES FINAIS PERFIL E EVENTOS DO PRODUTOR
+========================================= */
+
+.profile-screen {
+  overflow-y: auto !important;
+  height: 100dvh;
+}
+
+.profile-screen .profile-page {
+  min-height: auto;
+  padding-bottom: 96px;
+}
+
+.producer-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.producer-error {
+  display: block;
+  margin-top: 5px;
+  color: #b33a3a;
+  font-size: 11px;
+}
+
+.producer-secondary-button {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
+  background: #c4e1e6;
+  color: #392d46;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.producer-form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.producer-form-actions button {
+  flex: 1;
+}
+
+.producer-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.producer-event {
+  padding: 14px;
+  border: 1px solid #e2d9e5;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.producer-event-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.producer-event-top > span {
+  color: #8d8193;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.producer-event h3 {
+  margin: 8px 0 6px;
+  color: #392d46;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+}
+
+.producer-event p {
+  margin: 3px 0;
+  color: #756b7b;
+  font-size: 12px;
+}
+
+.producer-event > small {
+  display: block;
+  margin-top: 8px;
+  color: #9a8f9e;
+  font-size: 10px;
+}
+
+.producer-status {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.producer-status-pending {
+  background: #fff0bd;
+  color: #806500;
+}
+
+.producer-status-approved {
+  background: #dff4e8;
+  color: #23623c;
+}
+
+.producer-status-cancelled {
+  background: #f8dede;
+  color: #8c2f2f;
+}
+
+.producer-event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.producer-event-actions button {
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: #f8f3eb;
+  color: #392d46;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.producer-event-actions .moderation-button {
+  background: #392d46;
+  color: #fff4e7;
+}
+
+.producer-empty {
+  padding: 20px 12px;
+  border-radius: 14px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.producer-empty p {
+  margin: 0;
+  color: #8d8193;
+  font-size: 12px;
+}
+
+@media (max-width: 500px) {
+  .producer-form-row {
+    grid-template-columns: 1fr;
+  }
 }

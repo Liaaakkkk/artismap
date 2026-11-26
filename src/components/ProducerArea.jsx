@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../styles/UserProfile.css";
 
 const emptyProducer = {
   name: "",
@@ -40,32 +41,17 @@ function ProducerArea({
   onCancelEvent,
   onApproveEvent,
   onBack,
+  onLogout,
 }) {
-  const [producerForm, setProducerForm] =
-    useState(producer || emptyProducer);
-
-  const [eventForm, setEventForm] =
-    useState(emptyEvent);
-
-  const [editingId, setEditingId] =
-    useState(null);
-
-  const [errors, setErrors] =
-    useState({});
-
-  const [message, setMessage] =
-    useState("");
-
-  const [section, setSection] =
-    useState(
-      producer
-        ? "dashboard"
-        : "producer"
-    );
+  const [producerForm, setProducerForm] = useState(producer || emptyProducer);
+  const [eventForm, setEventForm] = useState(emptyEvent);
+  const [editingId, setEditingId] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
+  const [section, setSection] = useState(producer ? "dashboard" : "producer");
 
   function handleProducerChange(event) {
     const { name, value } = event.target;
-
     setProducerForm((current) => ({
       ...current,
       [name]: value,
@@ -75,41 +61,20 @@ function ProducerArea({
   function validateProducer() {
     const newErrors = {};
 
-    if (!producerForm.name.trim()) {
-      newErrors.name =
-        "Informe o nome do produtor.";
-    }
-
+    if (!producerForm.name.trim()) newErrors.name = "Informe o nome do produtor.";
     if (!producerForm.organization.trim()) {
-      newErrors.organization =
-        "Informe o nome da organização.";
+      newErrors.organization = "Informe o nome da organização.";
     }
-
     if (!producerForm.email.trim()) {
-      newErrors.email =
-        "Informe o e-mail.";
-    } else if (
-      !producerForm.email.includes("@")
-    ) {
-      newErrors.email =
-        "Informe um e-mail válido.";
+      newErrors.email = "Informe o e-mail.";
+    } else if (!producerForm.email.includes("@")) {
+      newErrors.email = "Informe um e-mail válido.";
     }
-
-    if (!producerForm.phone.trim()) {
-      newErrors.phone =
-        "Informe o telefone.";
-    }
-
-    if (!producerForm.city.trim()) {
-      newErrors.city =
-        "Informe a cidade.";
-    }
+    if (!producerForm.phone.trim()) newErrors.phone = "Informe o telefone.";
+    if (!producerForm.city.trim()) newErrors.city = "Informe a cidade.";
 
     setErrors(newErrors);
-
-    return (
-      Object.keys(newErrors).length === 0
-    );
+    return Object.keys(newErrors).length === 0;
   }
 
   function handleProducerSubmit(event) {
@@ -122,24 +87,19 @@ function ProducerArea({
 
     const producerData = {
       ...producerForm,
-      source:
-        "Cadastro informado pelo próprio produtor",
+      source: "Cadastro informado pelo próprio produtor",
       updatedAt: new Date().toISOString(),
     };
 
     onProducerSave(producerData);
-
     setProducerForm(producerData);
     setErrors({});
-    setMessage(
-      "Cadastro do produtor salvo com sucesso."
-    );
+    setMessage("Cadastro do produtor salvo com sucesso.");
     setSection("dashboard");
   }
 
   function handleEventChange(event) {
     const { name, value } = event.target;
-
     setEventForm((current) => ({
       ...current,
       [name]: value,
@@ -149,46 +109,16 @@ function ProducerArea({
   function validateEvent() {
     const newErrors = {};
 
-    if (!eventForm.title.trim()) {
-      newErrors.title =
-        "Informe o título do evento.";
-    }
-
-    if (!eventForm.category) {
-      newErrors.category =
-        "Selecione uma categoria.";
-    }
-
-    if (!eventForm.date) {
-      newErrors.date =
-        "Informe a data.";
-    }
-
-    if (!eventForm.time) {
-      newErrors.time =
-        "Informe o horário.";
-    }
-
-    if (!eventForm.location.trim()) {
-      newErrors.location =
-        "Informe o local.";
-    }
-
-    if (!eventForm.description.trim()) {
-      newErrors.description =
-        "Informe uma descrição.";
-    }
-
-    if (!eventForm.contact.trim()) {
-      newErrors.contact =
-        "Informe um contato para o evento.";
-    }
+    if (!eventForm.title.trim()) newErrors.title = "Informe o título do evento.";
+    if (!eventForm.category) newErrors.category = "Selecione uma categoria.";
+    if (!eventForm.date) newErrors.date = "Informe a data.";
+    if (!eventForm.time) newErrors.time = "Informe o horário.";
+    if (!eventForm.location.trim()) newErrors.location = "Informe o local.";
+    if (!eventForm.description.trim()) newErrors.description = "Informe uma descrição.";
+    if (!eventForm.contact.trim()) newErrors.contact = "Informe um contato para o evento.";
 
     setErrors(newErrors);
-
-    return (
-      Object.keys(newErrors).length === 0
-    );
+    return Object.keys(newErrors).length === 0;
   }
 
   function handleEventSubmit(event) {
@@ -201,16 +131,12 @@ function ProducerArea({
 
     const eventData = {
       ...eventForm,
-      category:
-        eventForm.category.toUpperCase(),
+      category: eventForm.category.toUpperCase(),
       status: "Pendente",
-      source:
-        "Informação enviada pelo produtor",
+      source: "Informação enviada pelo produtor",
       producerName: producerForm.name,
-      producerOrganization:
-        producerForm.organization,
-      submittedAt:
-        new Date().toISOString(),
+      producerOrganization: producerForm.organization,
+      submittedAt: new Date().toISOString(),
     };
 
     if (editingId) {
@@ -218,19 +144,13 @@ function ProducerArea({
         ...eventData,
         id: editingId,
       });
-
-      setMessage(
-        "Evento atualizado e reenviado para moderação."
-      );
+      setMessage("Evento atualizado e reenviado para moderação.");
     } else {
       onAddEvent({
         ...eventData,
         id: Date.now(),
       });
-
-      setMessage(
-        "Evento enviado com sucesso. Aguarde a moderação."
-      );
+      setMessage("Evento enviado com sucesso. Aguarde a moderação.");
     }
 
     setEventForm(emptyEvent);
@@ -246,8 +166,7 @@ function ProducerArea({
       date: event.date || "",
       time: event.time || "",
       location: event.location || "",
-      description:
-        event.description || "",
+      description: event.description || "",
       contact: event.contact || "",
     });
 
@@ -258,300 +177,189 @@ function ProducerArea({
   }
 
   function handleCancel(event) {
-    const confirmed = window.confirm(
-      "Deseja realmente cancelar este evento?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
+    const confirmed = window.confirm("Deseja realmente cancelar este evento?");
+    if (!confirmed) return;
 
     onCancelEvent(event.id);
-
-    setMessage(
-      "Cancelamento registrado. O evento não será exibido na Agenda."
-    );
+    setMessage("Cancelamento registrado. O evento não será exibido na Agenda.");
   }
 
   function handleApprove(event) {
     onApproveEvent(event.id);
+    setMessage("Evento aprovado na demonstração de moderação.");
+  }
 
-    setMessage(
-      "Evento aprovado na demonstração de moderação."
-    );
+  async function alterarFoto(event) {
+    const arquivo = event.target.files?.[0];
+    if (!arquivo) return;
+
+    try {
+      await onPhotoChange(arquivo);
+      setMessage("Foto de perfil atualizada com sucesso.");
+    } catch (error) {
+      setMessage(error.message || "Não foi possível atualizar a foto.");
+    } finally {
+      event.target.value = "";
+    }
   }
 
   function getStatusClass(status) {
-    if (status === "Publicado") {
-      return "producer-status producer-status-approved";
-    }
-
-    if (status === "Cancelado") {
-      return "producer-status producer-status-cancelled";
-    }
-
+    if (status === "Publicado") return "producer-status producer-status-approved";
+    if (status === "Cancelado") return "producer-status producer-status-cancelled";
     return "producer-status producer-status-pending";
   }
 
   return (
-    <main className="producer-area">
-      <header className="producer-header">
+    <main className="app profile-screen">
+      <section className="profile-page">
         <button
           type="button"
-          className="back-button"
-          onClick={onBack}
-          aria-label="Voltar"
+          className="profile-back-button"
+          onClick={() => {
+            if (section !== "dashboard" && producer) {
+              setSection("dashboard");
+              setEditingId(null);
+              setErrors({});
+              setMessage("");
+              return;
+            }
+            onBack();
+          }}
         >
-          ‹
+          ← Voltar
         </button>
 
-        <div>
-          <h1>Área do produtor</h1>
-
-          <p>
-            Cadastro e participação cultural
-          </p>
-        </div>
-      </header>
-
-      <section className="producer-content">
-        {message && (
-          <div className="producer-message">
-            {message}
+        {/* CABEÇALHO PADRONIZADO COM USERPROFILE */}
+        <header className="user-profile-heading">
+          <div className="profile-avatar">
+            {usuario?.fotoPerfil ? (
+              <img src={usuario.fotoPerfil} alt="Foto do produtor" />
+            ) : (
+              "👤"
+            )}
           </div>
+
+          <label
+            htmlFor="foto-perfil-produtor"
+            className="user-profile-photo-button"
+          >
+            Alterar foto
+          </label>
+          <input
+            id="foto-perfil-produtor"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={alterarFoto}
+            hidden
+          />
+
+          <h1>{producerForm.name || usuario?.nome || "Área do produtor"}</h1>
+          <p>{producerForm.organization || "Cadastro e participação cultural"}</p>
+
+          {section === "dashboard" && (
+            <button
+              type="button"
+              className="user-profile-photo-button"
+              style={{ marginTop: "10px", border: "none" }}
+              onClick={() => setSection("producer")}
+            >
+              Editar cadastro do produtor
+            </button>
+          )}
+        </header>
+
+        {message && (
+          <p className="user-profile-message" role="status" style={{ marginBottom: "16px" }}>
+            {message}
+          </p>
         )}
 
+        {/* ETAPA 1: CADASTRO DO PRODUTOR */}
         {section === "producer" && (
-          <form
-            className="producer-card"
-            onSubmit={
-              handleProducerSubmit
-            }
-          >
-            <div className="producer-card-header">
-              <span>ETAPA 1</span>
-
-              <h2>
-                Cadastro do produtor
-              </h2>
-
+          <form className="user-profile-card" onSubmit={handleProducerSubmit}>
+            <div className="user-profile-card-title">
+              <span>ÁREA DO PRODUTOR</span>
+              <h2>Cadastro do produtor</h2>
               <p>
-                Informe os dados de quem é
-                responsável pelas informações
-                dos eventos.
+                Informe os dados de quem é responsável pelas informações dos eventos.
               </p>
             </div>
 
-            <label>
+            <label className="user-profile-field">
               Nome completo
-
               <input
                 type="text"
                 name="name"
                 value={producerForm.name}
-                onChange={
-                  handleProducerChange
-                }
+                onChange={handleProducerChange}
                 placeholder="Ex.: Ana Carolina Souza"
               />
-
-              {errors.name && (
-                <small className="producer-error">
-                  {errors.name}
-                </small>
-              )}
+              {errors.name && <small className="producer-error">{errors.name}</small>}
             </label>
 
-            <label>
+            <label className="user-profile-field">
               Organização ou coletivo
-
               <input
                 type="text"
                 name="organization"
-                value={
-                  producerForm.organization
-                }
-                onChange={
-                  handleProducerChange
-                }
+                value={producerForm.organization}
+                onChange={handleProducerChange}
                 placeholder="Ex.: Coletivo Arte Viva"
               />
-
               {errors.organization && (
-                <small className="producer-error">
-                  {errors.organization}
-                </small>
+                <small className="producer-error">{errors.organization}</small>
               )}
             </label>
 
-            <label>
+            <label className="user-profile-field">
               E-mail
-
               <input
                 type="email"
                 name="email"
                 value={producerForm.email}
-                onChange={
-                  handleProducerChange
-                }
+                onChange={handleProducerChange}
                 placeholder="produtor@email.com"
               />
-
-              {errors.email && (
-                <small className="producer-error">
-                  {errors.email}
-                </small>
-              )}
+              {errors.email && <small className="producer-error">{errors.email}</small>}
             </label>
 
-            <label>
+            <label className="user-profile-field">
               Telefone
-
               <input
                 type="tel"
                 name="phone"
                 value={producerForm.phone}
-                onChange={
-                  handleProducerChange
-                }
+                onChange={handleProducerChange}
                 placeholder="(85) 99999-9999"
               />
-
-              {errors.phone && (
-                <small className="producer-error">
-                  {errors.phone}
-                </small>
-              )}
+              {errors.phone && <small className="producer-error">{errors.phone}</small>}
             </label>
 
-            <label>
+            <label className="user-profile-field">
               Cidade
-
               <input
                 type="text"
                 name="city"
                 value={producerForm.city}
-                onChange={
-                  handleProducerChange
-                }
+                onChange={handleProducerChange}
                 placeholder="Fortaleza"
               />
-
-              {errors.city && (
-                <small className="producer-error">
-                  {errors.city}
-                </small>
-              )}
+              {errors.city && <small className="producer-error">{errors.city}</small>}
             </label>
 
-            <div className="producer-source">
-              <strong>
-                Fonte da informação
-              </strong>
-
-              <span>
-                Cadastro informado pelo próprio
-                produtor
-              </span>
-            </div>
-
-            <button
-              className="producer-primary-button"
-              type="submit"
-            >
+            <button type="submit" className="user-profile-save">
               Salvar cadastro
             </button>
           </form>
         )}
 
+        {/* DASHBOARD DO PRODUTOR */}
         {section === "dashboard" && (
           <>
-            <section className="producer-welcome">
-              <span>
-                PRODUTOR CADASTRADO
-              </span>
-
-              <div style={{
-                width: "104px",
-                height: "104px",
-                borderRadius: "50%",
-                overflow: "hidden",
-                margin: "0 0 14px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#eee",
-                fontSize: "36px",
-              }}>
-                {usuario?.fotoPerfil ? (
-                  <img
-                    src={usuario.fotoPerfil}
-                    alt="Foto do produtor"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  "👤"
-                )}
-              </div>
-
-              <label
-                htmlFor="foto-perfil-produtor"
-                className="producer-secondary-button"
-                style={{
-                  display: "inline-block",
-                  cursor: "pointer",
-                  marginBottom: "14px",
-                }}
-              >
-                Alterar foto do perfil
-              </label>
-              <input
-                id="foto-perfil-produtor"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                style={{ display: "none" }}
-                onChange={async (event) => {
-                  const arquivo = event.target.files?.[0];
-                  if (!arquivo) return;
-
-                  try {
-                    await onPhotoChange(arquivo);
-                    setMessage("Foto de perfil atualizada com sucesso.");
-                  } catch (error) {
-                    setMessage(error.message);
-                  } finally {
-                    event.target.value = "";
-                  }
-                }}
-              />
-
-              <h2>
-                {producerForm.name}
-              </h2>
-
-              <p>
-                {producerForm.organization}
-              </p>
-
+            <div style={{ marginBottom: "16px" }}>
               <button
                 type="button"
-                className="producer-secondary-button"
-                onClick={() =>
-                  setSection("producer")
-                }
-              >
-                Editar cadastro
-              </button>
-            </section>
-
-            <div className="producer-actions">
-              <button
-                type="button"
-                className="producer-primary-button"
+                className="user-profile-save"
                 onClick={() => {
                   setEditingId(null);
                   setEventForm(emptyEvent);
@@ -564,107 +372,54 @@ function ProducerArea({
               </button>
             </div>
 
-            <section className="producer-card">
-              <div className="producer-card-header">
-                <span>
-                  MEUS EVENTOS
-                </span>
-
-                <h2>
-                  Eventos enviados
-                </h2>
-
+            <section className="user-profile-card">
+              <div className="user-profile-card-title">
+                <span>MEUS EVENTOS</span>
+                <h2>Eventos enviados</h2>
                 <p>
-                  Acompanhe o estado das
-                  informações enviadas para a
-                  Agenda.
+                  Acompanhe o estado das informações enviadas para a Agenda.
                 </p>
               </div>
 
               {events.length === 0 ? (
                 <div className="producer-empty">
-                  <p>
-                    Você ainda não cadastrou
-                    nenhum evento.
-                  </p>
+                  <p>Você ainda não cadastrou nenhum evento.</p>
                 </div>
               ) : (
                 <div className="producer-event-list">
                   {events.map((event) => (
-                    <article
-                      className="producer-event"
-                      key={event.id}
-                    >
+                    <article className="producer-event" key={event.id}>
                       <div className="producer-event-top">
-                        <span>
-                          {event.category}
-                        </span>
-
-                        <strong
-                          className={getStatusClass(
-                            event.status
-                          )}
-                        >
+                        <span>{event.category}</span>
+                        <strong className={getStatusClass(event.status)}>
                           {event.status}
                         </strong>
                       </div>
 
-                      <h3>
-                        {event.title}
-                      </h3>
-
+                      <h3>{event.title}</h3>
+                      <p>📍 {event.location}</p>
                       <p>
-                        📍 {event.location}
+                        ◉ {event.date} às {event.time}
                       </p>
-
-                      <p>
-                        ◉ {event.date} às{" "}
-                        {event.time}
-                      </p>
-
-                      <small>
-                        Fonte:{" "}
-                        {event.source}
-                      </small>
+                      <small>Fonte: {event.source}</small>
 
                       <div className="producer-event-actions">
-                        {event.status !==
-                          "Cancelado" && (
+                        {event.status !== "Cancelado" && (
                           <>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleEdit(
-                                  event
-                                )
-                              }
-                            >
+                            <button type="button" onClick={() => handleEdit(event)}>
                               Editar
                             </button>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleCancel(
-                                  event
-                                )
-                              }
-                            >
+                            <button type="button" onClick={() => handleCancel(event)}>
                               Cancelar
                             </button>
                           </>
                         )}
 
-                        {event.status ===
-                          "Pendente" && (
+                        {event.status === "Pendente" && (
                           <button
                             type="button"
                             className="moderation-button"
-                            onClick={() =>
-                              handleApprove(
-                                event
-                              )
-                            }
+                            onClick={() => handleApprove(event)}
                           >
                             Simular aprovação
                           </button>
@@ -676,209 +431,148 @@ function ProducerArea({
               )}
             </section>
 
-            <div className="producer-demo-note">
-              <strong>
-                Demonstração de moderação
-              </strong>
-
-              <p>
-                O botão "Simular aprovação"
-                representa a ação de um
-                moderador. Em uma próxima etapa,
-                essa operação deverá ser protegida
-                por autenticação e permissão de
-                moderador.
-              </p>
+            <div className="user-profile-card" style={{ textAlign: "left" }}>
+              <div className="user-profile-card-title" style={{ marginBottom: 0 }}>
+                <span>MODERAÇÃO</span>
+                <h2 style={{ fontSize: "16px" }}>Demonstração de moderação</h2>
+                <p>
+                  O botão "Simular aprovação" representa a ação de um moderador.
+                  Em uma próxima etapa, essa operação deverá ser protegida por
+                  autenticação e permissão de moderador.
+                </p>
+              </div>
             </div>
+
+            {onLogout && (
+              <button
+                type="button"
+                className="logout-button"
+                onClick={onLogout}
+              >
+                Sair da conta
+              </button>
+            )}
           </>
         )}
 
+        {/* ETAPA 2: CADASTRAR / EDITAR EVENTO */}
         {section === "event" && (
-          <form
-            className="producer-card"
-            onSubmit={handleEventSubmit}
-          >
-            <div className="producer-card-header">
-              <span>ETAPA 2</span>
-
-              <h2>
-                {editingId
-                  ? "Editar evento"
-                  : "Cadastrar evento"}
-              </h2>
-
+          <form className="user-profile-card" onSubmit={handleEventSubmit}>
+            <div className="user-profile-card-title">
+              <span>EVENTO CULTURAL</span>
+              <h2>{editingId ? "Editar evento" : "Cadastrar evento"}</h2>
               <p>
-                Preencha as informações que serão
-                analisadas antes da publicação.
+                Preencha as informações que serão analisadas antes da publicação.
               </p>
             </div>
 
-            <label>
+            <label className="user-profile-field">
               Nome do evento
-
               <input
                 type="text"
                 name="title"
                 value={eventForm.title}
-                onChange={
-                  handleEventChange
-                }
+                onChange={handleEventChange}
                 placeholder="Ex.: Festival de Música"
               />
-
-              {errors.title && (
-                <small className="producer-error">
-                  {errors.title}
-                </small>
-              )}
+              {errors.title && <small className="producer-error">{errors.title}</small>}
             </label>
 
-            <label>
+            <label className="user-profile-field">
               Categoria
-
               <select
                 name="category"
                 value={eventForm.category}
-                onChange={
-                  handleEventChange
-                }
+                onChange={handleEventChange}
               >
-                <option value="">
-                  Selecione uma categoria
-                </option>
-
-                {categories.map(
-                  (category) => (
-                    <option
-                      key={category}
-                      value={category}
-                    >
-                      {category}
-                    </option>
-                  )
-                )}
+                <option value="">Selecione uma categoria</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
               </select>
-
               {errors.category && (
-                <small className="producer-error">
-                  {errors.category}
-                </small>
+                <small className="producer-error">{errors.category}</small>
               )}
             </label>
 
             <div className="producer-form-row">
-              <label>
+              <label className="user-profile-field">
                 Data
-
                 <input
                   type="date"
                   name="date"
                   value={eventForm.date}
-                  onChange={
-                    handleEventChange
-                  }
+                  onChange={handleEventChange}
                 />
-
-                {errors.date && (
-                  <small className="producer-error">
-                    {errors.date}
-                  </small>
-                )}
+                {errors.date && <small className="producer-error">{errors.date}</small>}
               </label>
 
-              <label>
+              <label className="user-profile-field">
                 Horário
-
                 <input
                   type="time"
                   name="time"
                   value={eventForm.time}
-                  onChange={
-                    handleEventChange
-                  }
+                  onChange={handleEventChange}
                 />
-
-                {errors.time && (
-                  <small className="producer-error">
-                    {errors.time}
-                  </small>
-                )}
+                {errors.time && <small className="producer-error">{errors.time}</small>}
               </label>
             </div>
 
-            <label>
+            <label className="user-profile-field">
               Local
-
               <input
                 type="text"
                 name="location"
                 value={eventForm.location}
-                onChange={
-                  handleEventChange
-                }
+                onChange={handleEventChange}
                 placeholder="Ex.: Centro Cultural"
               />
-
               {errors.location && (
-                <small className="producer-error">
-                  {errors.location}
-                </small>
+                <small className="producer-error">{errors.location}</small>
               )}
             </label>
 
-            <label>
+            <label className="user-profile-field">
               Descrição
-
               <textarea
                 name="description"
-                value={
-                  eventForm.description
-                }
-                onChange={
-                  handleEventChange
-                }
+                value={eventForm.description}
+                onChange={handleEventChange}
                 placeholder="Descreva o evento, programação e público."
-                rows="5"
+                rows="4"
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  borderRadius: "12px",
+                  border: "1px solid #ddd2df",
+                  fontFamily: "inherit",
+                  fontSize: "14px",
+                  resize: "vertical",
+                }}
               />
-
               {errors.description && (
-                <small className="producer-error">
-                  {errors.description}
-                </small>
+                <small className="producer-error">{errors.description}</small>
               )}
             </label>
 
-            <label>
+            <label className="user-profile-field">
               Contato do evento
-
               <input
                 type="text"
                 name="contact"
                 value={eventForm.contact}
-                onChange={
-                  handleEventChange
-                }
+                onChange={handleEventChange}
                 placeholder="E-mail ou telefone para informações"
               />
-
               {errors.contact && (
-                <small className="producer-error">
-                  {errors.contact}
-                </small>
+                <small className="producer-error">{errors.contact}</small>
               )}
             </label>
 
-            <div className="producer-source">
-              <strong>
-                Fonte da informação
-              </strong>
-
-              <span>
-                Informação enviada pelo produtor
-              </span>
-            </div>
-
-            <div className="producer-form-actions">
+            <div className="producer-form-actions" style={{ marginTop: "12px" }}>
               <button
                 type="button"
                 className="producer-secondary-button"
@@ -890,42 +584,16 @@ function ProducerArea({
                   setMessage("");
                 }}
               >
-                Voltar
+                Cancelar
               </button>
 
-              <button
-                className="producer-primary-button"
-                type="submit"
-              >
-                {editingId
-                  ? "Atualizar evento"
-                  : "Enviar para moderação"}
+              <button type="submit" className="user-profile-save" style={{ marginTop: 0 }}>
+                {editingId ? "Atualizar evento" : "Enviar evento"}
               </button>
             </div>
           </form>
         )}
       </section>
-
-      <nav className="bottom-navigation producer-navigation">
-        <button
-          type="button"
-          onClick={onBack}
-        >
-          <span>⌂</span>
-          <small>Explorar</small>
-        </button>
-
-        <button
-          type="button"
-          className="producer-nav-active"
-          onClick={() =>
-            setSection("dashboard")
-          }
-        >
-          <span>♙</span>
-          <small>Produtor</small>
-        </button>
-      </nav>
     </main>
   );
 }
