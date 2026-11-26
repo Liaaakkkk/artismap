@@ -1,9 +1,4 @@
-html,
-body,
-#root {
-  margin: 0;
-  min-height: 100%;
-}
+
 
 .explore-page {
   width: 100%;
@@ -303,11 +298,11 @@ body,
 
 .explore-navigation {
   position: fixed;
-  left: 50%;
+  left: 0;
   bottom: 0;
   width: 100%;
-  max-width: 430px;
-  transform: translateX(-50%);
+  max-width: none;
+  transform: none;
 }
 
 @media (min-width: 768px) {
@@ -317,11 +312,7 @@ body,
     border-radius: 0;
     overflow: hidden;
   }
-
-  .explore-navigation {
-    bottom: 20px;
-  }
-} 
+}
 
 /* =========================================
    BOTÕES — VISUAL ARREDONDADO ARTISMAP
@@ -639,3 +630,4 @@ body,
   outline: 3px solid #8bbdc5;
   outline-offset: 3px;
 }
+

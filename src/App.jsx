@@ -630,30 +630,25 @@ function App() {
       )}
 
       {telaAtual === "explorar" && (
-        <ExploreEvents
-          events={events}
-          savedEvents={savedEvents}
-          onToggleSaved={toggleSavedEvent}
-          fotoPerfil={usuario?.fotoPerfil}
-          onOpenMap={() => setTelaAtual("mapa")}
-          onOpenAgenda={() => setTelaAtual("agenda")}
-          onOpenSaved={() => setTelaAtual("salvos")}
-          onOpenProfile={() => setTelaAtual("perfil")}
-        />
-      )}
+        <main className="explore-screen-wrapper">
+          <ExploreEvents
+            events={events}
+            savedEvents={savedEvents}
+            onToggleSaved={toggleSavedEvent}
+            fotoPerfil={usuario?.fotoPerfil}
+            onOpenMap={() => setTelaAtual("mapa")}
+            onOpenAgenda={() => setTelaAtual("agenda")}
+            onOpenSaved={() => setTelaAtual("salvos")}
+            onOpenProfile={() => setTelaAtual("perfil")}
+            />
+            </main>
+          )}
 
       {telaAtual === "mapa" && (
         <main className="app">
           <header className="top-area">
             <div className="top-controls">
-              <button
-                type="button"
-                className="menu-button"
-                aria-label="Abrir agenda"
-                onClick={() => setTelaAtual("agenda")}
-              >
-                ☰
-              </button>
+              
 
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
 
