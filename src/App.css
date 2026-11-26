@@ -1691,3 +1691,36 @@ html, body, #root {
 .app > .location-button {
   bottom: 84px !important;
 }
+/* =========================================
+   BOTÃO CATÁLOGO PADRONIZADO
+========================================= */
+
+.catalog-button,
+.catalogo-button {
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: #c4e1e6;
+  color: #392d46;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.catalog-button:hover,
+.catalogo-button:hover {
+  background: #d8edf0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.catalog-button:active,
+.catalogo-button:active {
+  transform: scale(0.96);
+}
