@@ -1,4 +1,3 @@
-
 import BottomNav from "./components/BottomNav";
 
 import { useEffect, useMemo, useState } from "react";
@@ -104,83 +103,22 @@ function normalizarCategoria(categoria) {
 function normalizarEvento(evento) {
   return {
     id: String(evento._id || evento.id),
-
-    title:
-      evento.titulo ||
-      evento.title ||
-      "Evento sem título",
-
-    category:
-      evento.categoria ||
-      evento.category ||
-      "OUTROS",
-
-    date: String(
-      evento.data || evento.date || ""
-    ).slice(0, 10),
-
-    time:
-      evento.horario ||
-      evento.time ||
-      "",
-
-    location:
-      evento.local ||
-      evento.location ||
-      "",
-
-    address:
-      evento.endereco ||
-      evento.address ||
-      "",
-
-    city:
-      evento.cidade ||
-      evento.city ||
-      "Fortaleza",
-
-    description:
-      evento.descricao ||
-      evento.description ||
-      "",
-
-    status: String(
-      evento.status || "agendado"
-    ).toLowerCase(),
-
-    preco:
-      evento.preco ||
-      evento.price ||
-      "",
-
-    price:
-      evento.preco ||
-      evento.price ||
-      "Não informado",
-
-    imagem:
-      evento.imagem ||
-      "",
-
-    link:
-      evento.link ||
-      "",
-
-    organizador:
-      evento.organizador ||
-      "",
-
-    // Coordenadas utilizadas pelo mapa
-    latitude:
-      evento.latitude == null
-        ? null
-        : Number(evento.latitude),
-
-    longitude:
-      evento.longitude == null
-        ? null
-        : Number(evento.longitude),
-
+    title: evento.titulo || evento.title || "Evento sem título",
+    category: evento.categoria || evento.category || "OUTROS",
+    date: String(evento.data || evento.date || "").slice(0, 10),
+    time: evento.horario || evento.time || "",
+    location: evento.local || evento.location || "",
+    address: evento.endereco || evento.address || "",
+    city: evento.cidade || evento.city || "Fortaleza",
+    description: evento.descricao || evento.description || "",
+    status: String(evento.status || "agendado").toLowerCase(),
+    preco: evento.preco || evento.price || "",
+    price: evento.preco || evento.price || "Não informado",
+    imagem: evento.imagem || "",
+    link: evento.link || "",
+    organizador: evento.organizador || "",
+    latitude: evento.latitude == null ? null : Number(evento.latitude),
+    longitude: evento.longitude == null ? null : Number(evento.longitude),
     type: "evento",
   };
 }
@@ -192,76 +130,27 @@ function normalizarEvento(evento) {
 */
 
 function App() {
-  /*
-  |--------------------------------------------------------------------------
-  | Usuário
-  |--------------------------------------------------------------------------
-  */
-
   const [usuario, setUsuario] = useState(() => obterUsuario());
-
-  /*
-  |--------------------------------------------------------------------------
-  | Tela inicial
-  |--------------------------------------------------------------------------
-  */
 
   const [telaAtual, setTelaAtual] = useState(() => {
     const usuarioSalvo = obterUsuario();
-
-    if (!usuarioSalvo) {
-      return "login";
-    }
-
-    if (usuarioSalvo.tipo === "produtor") {
-      return "produtor";
-    }
-
+    if (!usuarioSalvo) return "login";
+    if (usuarioSalvo.tipo === "produtor") return "produtor";
     return "explorar";
   });
 
-  /*
-  |--------------------------------------------------------------------------
-  | Mapa
-  |--------------------------------------------------------------------------
-  */
-
-  const [selectedCategory, setSelectedCategory] =
-    useState("todos");
-
+  const [selectedCategory, setSelectedCategory] = useState("todos");
   const [searchTerm, setSearchTerm] = useState("");
-
   const [userLocation, setUserLocation] = useState(null);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Calendário
-  |--------------------------------------------------------------------------
-  */
-
-  const [currentDate, setCurrentDate] = useState(
-    () => new Date()
-  );
-
-  const [selectedDate, setSelectedDate] = useState(
-    () => new Date()
-  );
-
-  /*
-  |--------------------------------------------------------------------------
-  | Eventos vindos do MongoDB
-  |--------------------------------------------------------------------------
-  */
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
 
   const [apiEvents, setApiEvents] = useState([]);
-
   const [loadingEvents, setLoadingEvents] = useState(false);
 
   useEffect(() => {
-    if (
-      telaAtual !== "agenda" &&
-      telaAtual !== "explorar"
-    ) {
+    if (telaAtual !== "agenda" && telaAtual !== "explorar") {
       return;
     }
 
@@ -270,21 +159,16 @@ function App() {
     async function buscarEventos() {
       try {
         setLoadingEvents(true);
-
         const resposta = await fetch(API_EVENTOS);
 
         if (!resposta.ok) {
-          throw new Error(
-            "Não foi possível buscar os eventos."
-          );
+          throw new Error("Não foi possível buscar os eventos.");
         }
 
         const dados = await resposta.json();
 
         if (!Array.isArray(dados)) {
-          throw new Error(
-            "A resposta da API não possui uma lista de eventos."
-          );
+          throw new Error("A resposta da API não possui uma lista de eventos.");
         }
 
         const eventosNormalizados = dados
@@ -292,11 +176,7 @@ function App() {
           .filter((evento) => {
             return (
               evento.date &&
-              ![
-                "inativo",
-                "cancelado",
-                "pendente",
-              ].includes(evento.status)
+              !["inativo", "cancelado", "pendente"].includes(evento.status)
             );
           });
 
@@ -304,10 +184,7 @@ function App() {
           setApiEvents(eventosNormalizados);
         }
       } catch (erro) {
-        console.error(
-          "Erro ao carregar eventos:",
-          erro
-        );
+        console.error("Erro ao carregar eventos:", erro);
       } finally {
         if (ativo) {
           setLoadingEvents(false);
@@ -322,21 +199,9 @@ function App() {
     };
   }, [telaAtual]);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Dados do produtor
-  |--------------------------------------------------------------------------
-  */
-
   const [producer, setProducer] = useState(() => {
-    const savedProducer = localStorage.getItem(
-      "artismap-producer"
-    );
-
-    if (!savedProducer) {
-      return null;
-    }
-
+    const savedProducer = localStorage.getItem("artismap-producer");
+    if (!savedProducer) return null;
     try {
       return JSON.parse(savedProducer);
     } catch {
@@ -345,14 +210,8 @@ function App() {
   });
 
   const [producerEvents, setProducerEvents] = useState(() => {
-    const savedEvents = localStorage.getItem(
-      "artismap-producer-events"
-    );
-
-    if (!savedEvents) {
-      return [];
-    }
-
+    const savedEvents = localStorage.getItem("artismap-producer-events");
+    if (!savedEvents) return [];
     try {
       return JSON.parse(savedEvents);
     } catch {
@@ -360,79 +219,29 @@ function App() {
     }
   });
 
-  /*
-  |--------------------------------------------------------------------------
-  | Lista geral de eventos
-  |--------------------------------------------------------------------------
-  */
-
   const events = useMemo(() => {
     const publishedProducerEvents = producerEvents
-      .filter(
-        (event) => event.status === "Publicado"
-      )
+      .filter((event) => event.status === "Publicado")
       .map((event) => ({
         ...event,
-
         id: String(event.id),
-
-        title:
-          event.title ||
-          event.titulo,
-
-        category:
-          event.category ||
-          event.categoria,
-
-        date: String(
-          event.date ||
-          event.data ||
-          ""
-        ).slice(0, 10),
-
-        time:
-          event.time ||
-          event.horario ||
-          "",
-
-        location:
-          event.location ||
-          event.local ||
-          "",
-
-        latitude:
-          event.latitude == null
-            ? null
-            : Number(event.latitude),
-
-        longitude:
-          event.longitude == null
-            ? null
-            : Number(event.longitude),
+        title: event.title || event.titulo,
+        category: event.category || event.categoria,
+        date: String(event.date || event.data || "").slice(0, 10),
+        time: event.time || event.horario || "",
+        location: event.location || event.local || "",
+        latitude: event.latitude == null ? null : Number(event.latitude),
+        longitude: event.longitude == null ? null : Number(event.longitude),
       }));
 
-    return [
-      ...initialEvents,
-      ...apiEvents,
-      ...publishedProducerEvents,
-    ];
+    return [...initialEvents, ...apiEvents, ...publishedProducerEvents];
   }, [apiEvents, producerEvents]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Eventos favoritos
-  |--------------------------------------------------------------------------
-  */
 
   const [savedEvents, setSavedEvents] = useState(() => {
     try {
-      const email =
-        obterUsuario()?.email || "visitante";
-
+      const email = obterUsuario()?.email || "visitante";
       return JSON.parse(
-        localStorage.getItem(
-          `artismap-favoritos-${email}`
-        ) || "[]"
+        localStorage.getItem(`artismap-favoritos-${email}`) || "[]"
       );
     } catch {
       return [];
@@ -441,48 +250,28 @@ function App() {
 
   function persistirSalvos(lista) {
     setSavedEvents(lista);
-
     const email = usuario?.email || "visitante";
-
-    localStorage.setItem(
-      `artismap-favoritos-${email}`,
-      JSON.stringify(lista)
-    );
+    localStorage.setItem(`artismap-favoritos-${email}`, JSON.stringify(lista));
   }
 
   function toggleSavedEvent(evento) {
     const id = String(evento.id);
-
-    const jaSalvo = savedEvents.some(
-      (item) => String(item.id) === id
-    );
+    const jaSalvo = savedEvents.some((item) => String(item.id) === id);
 
     persistirSalvos(
       jaSalvo
-        ? savedEvents.filter(
-            (item) => String(item.id) !== id
-          )
+        ? savedEvents.filter((item) => String(item.id) !== id)
         : [...savedEvents, evento]
     );
   }
 
   function removerEventoSalvo(eventId) {
     persistirSalvos(
-      savedEvents.filter(
-        (item) =>
-          String(item.id) !== String(eventId)
-      )
+      savedEvents.filter((item) => String(item.id) !== String(eventId))
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Pontos do mapa
-  |--------------------------------------------------------------------------
-  */
-
   const mapPoints = useMemo(() => {
-    // Transforma os eventos em pontos que o mapa consegue exibir.
     const eventosComLocalizacao = events
       .filter((event) => {
         return (
@@ -494,92 +283,36 @@ function App() {
       })
       .map((event) => ({
         ...event,
-
         id: String(event.id),
-
-        name:
-          event.title ||
-          event.titulo ||
-          "Evento sem título",
-
-        category: normalizarCategoria(
-          event.category || event.categoria
-        ),
-
-        description:
-          event.description ||
-          event.descricao ||
-          "",
-
-        address:
-          event.address ||
-          event.endereco ||
-          event.location ||
-          "",
-
-        city:
-          event.city ||
-          event.cidade ||
-          "Fortaleza",
-
-        price:
-          event.price ||
-          event.preco ||
-          "Não informado",
-
+        name: event.title || event.titulo || "Evento sem título",
+        category: normalizarCategoria(event.category || event.categoria),
+        description: event.description || event.descricao || "",
+        address: event.address || event.endereco || event.location || "",
+        city: event.city || event.cidade || "Fortaleza",
+        price: event.price || event.preco || "Não informado",
         type: "evento",
       }));
 
-    // Junta os eventos aos pontos culturais já cadastrados.
-    return [
-      ...culturalPoints,
-      ...eventosComLocalizacao,
-    ];
+    return [...culturalPoints, ...eventosComLocalizacao];
   }, [events]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Filtros do mapa
-  |--------------------------------------------------------------------------
-  */
 
   const filteredPoints = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-
-    const categoriaSelecionada =
-      normalizarCategoria(selectedCategory);
+    const categoriaSelecionada = normalizarCategoria(selectedCategory);
 
     return mapPoints.filter((point) => {
-      const categoriaPonto =
-        normalizarCategoria(point.category);
-
+      const categoriaPonto = normalizarCategoria(point.category);
       const categoryMatches =
         selectedCategory === "todos" ||
         categoriaPonto === categoriaSelecionada;
 
-      if (!categoryMatches) {
-        return false;
-      }
+      if (!categoryMatches) return false;
+      if (!term) return true;
 
-      if (!term) {
-        return true;
-      }
-
-      const nome = String(
-        point.name || point.title || ""
-      ).toLowerCase();
-
-      const descricao = String(
-        point.description || ""
-      ).toLowerCase();
-
-      const endereco = String(
-        point.address || point.location || ""
-      ).toLowerCase();
-
-      const cidade = String(
-        point.city || ""
-      ).toLowerCase();
+      const nome = String(point.name || point.title || "").toLowerCase();
+      const descricao = String(point.description || "").toLowerCase();
+      const endereco = String(point.address || point.location || "").toLowerCase();
+      const cidade = String(point.city || "").toLowerCase();
 
       return (
         nome.includes(term) ||
@@ -588,50 +321,23 @@ function App() {
         cidade.includes(term)
       );
     });
-  }, [
-    mapPoints,
-    selectedCategory,
-    searchTerm,
-  ]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Eventos da data selecionada
-  |--------------------------------------------------------------------------
-  */
+  }, [mapPoints, selectedCategory, searchTerm]);
 
   const selectedEvents = useMemo(() => {
-    if (!selectedDate) {
-      return [];
-    }
+    if (!selectedDate) return [];
 
     const dateString =
       `${selectedDate.getFullYear()}-` +
-      `${String(
-        selectedDate.getMonth() + 1
-      ).padStart(2, "0")}-` +
-      `${String(
-        selectedDate.getDate()
-      ).padStart(2, "0")}`;
+      `${String(selectedDate.getMonth() + 1).padStart(2, "0")}-` +
+      `${String(selectedDate.getDate()).padStart(2, "0")}`;
 
     return events.filter((event) => {
       return (
         event.date === dateString &&
-        ![
-          "inativo",
-          "cancelado",
-          "pendente",
-          "Cancelado",
-        ].includes(event.status)
+        !["inativo", "cancelado", "pendente", "Cancelado"].includes(event.status)
       );
     });
   }, [selectedDate, events]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Login
-  |--------------------------------------------------------------------------
-  */
 
   function handleLogin(usuarioLogado) {
     setUsuario(usuarioLogado);
@@ -640,9 +346,7 @@ function App() {
       setSavedEvents(
         JSON.parse(
           localStorage.getItem(
-            `artismap-favoritos-${
-              usuarioLogado.email || "visitante"
-            }`
+            `artismap-favoritos-${usuarioLogado.email || "visitante"}`
           ) || "[]"
         )
       );
@@ -658,12 +362,6 @@ function App() {
     setTelaAtual("explorar");
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Cadastro
-  |--------------------------------------------------------------------------
-  */
-
   function handleCadastro(usuarioCadastrado) {
     setUsuario(usuarioCadastrado);
 
@@ -671,9 +369,7 @@ function App() {
       setSavedEvents(
         JSON.parse(
           localStorage.getItem(
-            `artismap-favoritos-${
-              usuarioCadastrado.email || "visitante"
-            }`
+            `artismap-favoritos-${usuarioCadastrado.email || "visitante"}`
           ) || "[]"
         )
       );
@@ -689,170 +385,81 @@ function App() {
     setTelaAtual("explorar");
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Foto de perfil
-  |--------------------------------------------------------------------------
-  */
-
   async function handlePhotoChange(arquivo) {
     if (!usuario?.id) {
-      throw new Error(
-        "Faça login novamente para alterar sua foto."
-      );
+      throw new Error("Faça login novamente para alterar sua foto.");
     }
 
-    const usuarioAtualizado =
-      await atualizarFotoPerfil(
-        usuario.id,
-        arquivo
-      );
-
+    const usuarioAtualizado = await atualizarFotoPerfil(usuario.id, arquivo);
     setUsuario(usuarioAtualizado);
-
     return usuarioAtualizado;
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Logout
-  |--------------------------------------------------------------------------
-  */
-
   function handleLogout() {
     logoutUsuario();
-
     setUsuario(null);
     setTelaAtual("login");
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Dados do produtor
-  |--------------------------------------------------------------------------
-  */
-
   function handleProducerSave(producerData) {
     setProducer(producerData);
-
-    localStorage.setItem(
-      "artismap-producer",
-      JSON.stringify(producerData)
-    );
+    localStorage.setItem("artismap-producer", JSON.stringify(producerData));
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Salvar eventos do produtor
-  |--------------------------------------------------------------------------
-  */
 
   function saveProducerEvents(updatedEvents) {
     setProducerEvents(updatedEvents);
-
     localStorage.setItem(
       "artismap-producer-events",
       JSON.stringify(updatedEvents)
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Adicionar evento do produtor
-  |--------------------------------------------------------------------------
-  */
-
   function handleAddEvent(newEvent) {
-    const updatedEvents = [
-      ...producerEvents,
-      newEvent,
-    ];
-
-    saveProducerEvents(updatedEvents);
+    saveProducerEvents([...producerEvents, newEvent]);
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Atualizar evento do produtor
-  |--------------------------------------------------------------------------
-  */
 
   function handleUpdateEvent(updatedEvent) {
-    const updatedEvents = producerEvents.map(
-      (event) =>
-        String(event.id) === String(updatedEvent.id)
-          ? updatedEvent
-          : event
+    const updatedEvents = producerEvents.map((event) =>
+      String(event.id) === String(updatedEvent.id) ? updatedEvent : event
     );
-
     saveProducerEvents(updatedEvents);
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Cancelar evento do produtor
-  |--------------------------------------------------------------------------
-  */
 
   function handleCancelEvent(eventId) {
-    const updatedEvents = producerEvents.map(
-      (event) =>
-        String(event.id) === String(eventId)
-          ? {
-              ...event,
-              status: "Cancelado",
-              cancelledAt: new Date().toISOString(),
-            }
-          : event
+    const updatedEvents = producerEvents.map((event) =>
+      String(event.id) === String(eventId)
+        ? {
+            ...event,
+            status: "Cancelado",
+            cancelledAt: new Date().toISOString(),
+          }
+        : event
     );
-
     saveProducerEvents(updatedEvents);
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Aprovar evento do produtor
-  |--------------------------------------------------------------------------
-  */
 
   function handleApproveEvent(eventId) {
-    const updatedEvents = producerEvents.map(
-      (event) =>
-        String(event.id) === String(eventId)
-          ? {
-              ...event,
-              status: "Publicado",
-              approvedAt: new Date().toISOString(),
-            }
-          : event
+    const updatedEvents = producerEvents.map((event) =>
+      String(event.id) === String(eventId)
+        ? {
+            ...event,
+            status: "Publicado",
+            approvedAt: new Date().toISOString(),
+          }
+        : event
     );
-
     saveProducerEvents(updatedEvents);
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Navegação do calendário
-  |--------------------------------------------------------------------------
-  */
 
   function handlePreviousMonth() {
     setCurrentDate(
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() - 1,
-        1
-      )
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
     );
   }
 
   function handleNextMonth() {
     setCurrentDate(
-      new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
-        1
-      )
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
     );
   }
 
@@ -863,122 +470,45 @@ function App() {
       date.getMonth() !== currentDate.getMonth() ||
       date.getFullYear() !== currentDate.getFullYear()
     ) {
-      setCurrentDate(
-        new Date(
-          date.getFullYear(),
-          date.getMonth(),
-          1
-        )
-      );
+      setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
     }
   }
 
   function formatSelectedDate() {
-    if (!selectedDate) {
-      return "";
-    }
-
-    return selectedDate.toLocaleDateString(
-      "pt-BR",
-      {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }
-    );
+    if (!selectedDate) return "";
+    return selectedDate.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Clique no evento
-  |--------------------------------------------------------------------------
-  */
 
   function handleEventClick(event) {
     alert(
       `Evento selecionado: ${event.title}\n\n` +
-      "Esta ação será conectada à página completa do evento no PB04."
+        "Esta ação será conectada à página completa do evento no PB04."
     );
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | LOGIN
-  |--------------------------------------------------------------------------
-  */
 
   if (telaAtual === "login") {
     return (
       <Login
         onLogin={handleLogin}
-        onCriarConta={() =>
-          setTelaAtual("cadastro")
-        }
+        onCriarConta={() => setTelaAtual("cadastro")}
       />
     );
   }
-
-  /*
-  |--------------------------------------------------------------------------
-  | CADASTRO
-  |--------------------------------------------------------------------------
-  */
 
   if (telaAtual === "cadastro") {
     return (
       <Cadastro
         onCadastro={handleCadastro}
-        onVoltar={() =>
-          setTelaAtual("login")
-        }
+        onVoltar={() => setTelaAtual("login")}
       />
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | ÁREA DO PRODUTOR
-  |--------------------------------------------------------------------------
-  */
-
-  if (telaAtual === "produtor") {
-    if (
-      !usuario ||
-      usuario.tipo !== "produtor"
-    ) {
-      return (
-        <Login
-          onLogin={handleLogin}
-          onCriarConta={() =>
-            setTelaAtual("cadastro")
-          }
-        />
-      );
-    }
-
-    return (
-      <ProducerArea
-        usuario={usuario}
-        onPhotoChange={handlePhotoChange}
-        producer={producer}
-        onProducerSave={handleProducerSave}
-        events={producerEvents}
-        onAddEvent={handleAddEvent}
-        onUpdateEvent={handleUpdateEvent}
-        onCancelEvent={handleCancelEvent}
-        onApproveEvent={handleApproveEvent}
-        onBack={() =>
-          setTelaAtual("explorar")
-        }
-      />
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | TELAS DO USUÁRIO (COM NAVBAR ÚNICA E FIXA)
-  |--------------------------------------------------------------------------
-  */
+  const isProdutor = usuario?.tipo === "produtor";
 
   return (
     <>
@@ -993,14 +523,29 @@ function App() {
         />
       )}
 
-      {telaAtual === "perfil" && (
-        <UserProfile
-          usuario={usuario}
-          onPhotoChange={handlePhotoChange}
-          onBack={() => setTelaAtual("explorar")}
-          onLogout={handleLogout}
-        />
-      )}
+      {(telaAtual === "perfil" || telaAtual === "produtor") &&
+        (isProdutor ? (
+          <ProducerArea
+            usuario={usuario}
+            onPhotoChange={handlePhotoChange}
+            producer={producer}
+            onProducerSave={handleProducerSave}
+            events={producerEvents}
+            onAddEvent={handleAddEvent}
+            onUpdateEvent={handleUpdateEvent}
+            onCancelEvent={handleCancelEvent}
+            onApproveEvent={handleApproveEvent}
+            onBack={() => setTelaAtual("explorar")}
+            onLogout={handleLogout}
+          />
+        ) : (
+          <UserProfile
+            usuario={usuario}
+            onPhotoChange={handlePhotoChange}
+            onBack={() => setTelaAtual("explorar")}
+            onLogout={handleLogout}
+          />
+        ))}
 
       {telaAtual === "agenda" && (
         <main className="app agenda-screen">
@@ -1035,10 +580,7 @@ function App() {
                 onClick={() => setTelaAtual("perfil")}
               >
                 {usuario?.fotoPerfil ? (
-                  <img
-                    src={usuario.fotoPerfil}
-                    alt="Foto de perfil"
-                  />
+                  <img src={usuario.fotoPerfil} alt="Foto de perfil" />
                 ) : (
                   "👤"
                 )}
@@ -1056,13 +598,9 @@ function App() {
           />
 
           <section className="events-section">
-            <p className="selected-date">
-              {formatSelectedDate()}
-            </p>
+            <p className="selected-date">{formatSelectedDate()}</p>
 
-            {loadingEvents && (
-              <p>Carregando eventos...</p>
-            )}
+            {loadingEvents && <p>Carregando eventos...</p>}
 
             {selectedEvents.length > 0 ? (
               selectedEvents.map((event) => (
@@ -1075,9 +613,7 @@ function App() {
             ) : (
               !loadingEvents && (
                 <div className="empty-state">
-                  <p>
-                    Nenhum evento encontrado nesta data.
-                  </p>
+                  <p>Nenhum evento encontrado nesta data.</p>
                 </div>
               )
             )}
@@ -1114,11 +650,20 @@ function App() {
             <div className="top-controls">
               
 
-              <SearchBar
-                value={searchTerm}
-                onChange={setSearchTerm}
-              />
+              <SearchBar value={searchTerm} onChange={setSearchTerm} />
 
+              <button
+                type="button"
+                className="profile-button"
+                aria-label="Abrir perfil"
+                onClick={() => setTelaAtual("perfil")}
+              >
+                {usuario?.fotoPerfil ? (
+                  <img src={usuario.fotoPerfil} alt="Foto de perfil" />
+                ) : (
+                  "👤"
+                )}
+              </button>
             </div>
 
             <CategoryFilters
@@ -1131,25 +676,21 @@ function App() {
             </p>
           </header>
 
-          <MapView
-            points={filteredPoints}
-            userLocation={userLocation}
-          />
+          <MapView points={filteredPoints} userLocation={userLocation} />
 
           <div className="map-counter">
             📍 {filteredPoints.length}{" "}
-            {filteredPoints.length === 1
-              ? "ponto"
-              : "pontos"}
+            {filteredPoints.length === 1 ? "ponto" : "pontos"}
           </div>
 
-          <UserLocationButton
-            onLocationFound={setUserLocation}
-          />
+          <UserLocationButton onLocationFound={setUserLocation} />
         </main>
       )}
 
-      <BottomNav telaAtual={telaAtual} onNavigate={setTelaAtual} />
+      <BottomNav
+        telaAtual={telaAtual === "produtor" ? "perfil" : telaAtual}
+        onNavigate={setTelaAtual}
+      />
     </>
   );
 }
