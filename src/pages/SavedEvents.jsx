@@ -87,17 +87,7 @@ function SavedEvents({
         )}
       </section>
 
-      <nav className="bottom-navigation saved-navigation">
-        <button type="button" onClick={onOpenExplore}>
-          <span>⌂</span><small>Explorar</small>
-        </button>
-        <button type="button" onClick={onOpenMap}>
-          <span>⌖</span><small>Mapa</small>
-        </button>
-        <button type="button" className="active" aria-current="page">
-          <span>♥</span><small>Salvos</small>
-        </button>
-      </nav>
+      
     </main>
   );
 }

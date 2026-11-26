@@ -1477,6 +1477,7 @@ html, body, #root {
   background: #c4e1e6;
   color: #392d46;
   border-color: #c4e1e6;
+}
 /* Ajustes de posicionamento e identidade visual */
 .top-area,
 .producer-header {
@@ -1615,4 +1616,78 @@ html, body, #root {
   z-index: 1000;
   background: #fff3df;
   border-top: 1px solid rgba(64, 50, 82, 0.1);
+}
+
+/* =========================================
+   NAVBAR ÚNICA E FIXA EM TODAS AS TELAS
+========================================= */
+
+.unified-navigation {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 100% !important;
+  max-width: 430px !important;
+  height: 68px !important;
+  padding: 0 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  background: #fff3df !important;
+  border-top: 1px solid rgba(64, 50, 82, 0.1) !important;
+  box-shadow: 0 -4px 16px rgba(57, 45, 70, 0.06) !important;
+  z-index: 2000 !important;
+}
+
+.unified-navigation > button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 48px !important;
+  margin: 0 !important;
+  padding: 4px 2px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: #756b7b !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  cursor: pointer !important;
+}
+
+.unified-navigation > button span {
+  font-size: 18px !important;
+  line-height: 1.1 !important;
+}
+
+.unified-navigation > button small {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+
+.unified-navigation > button.active {
+  background: #c4e1e6 !important;
+  color: #392d46 !important;
+  border-color: #c4e1e6 !important;
+}
+
+/* Garante espaço inferior nas páginas para a barra fixa não cobrir o conteúdo */
+.app,
+.explore-page,
+.saved-page,
+.profile-screen,
+.catalog-page {
+  padding-bottom: 68px !important;
+}
+
+/* Mantém contador e botão de GPS do mapa acima da navbar fixa */
+.app > .map-counter,
+.app > .location-button {
+  bottom: 84px !important;
 }

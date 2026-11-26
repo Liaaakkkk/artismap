@@ -707,44 +707,7 @@ function ExploreEvents({
 
       )}
 
-      {/* NAVBAR */}
-
-      <nav className="bottom-navigation explore-navigation">
-
-        <button
-          type="button"
-          className="active"
-          aria-current="page"
-        >
-          <span>⌂</span>
-          <small>Explorar</small>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenMap}
-        >
-          <span>⌖</span>
-          <small>Mapa</small>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenSaved}
-        >
-          <span>♡</span>
-          <small>Salvos</small>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenAgenda}
-        >
-          <span>▦</span>
-          <small>Agenda</small>
-        </button>
-
-      </nav>
+    
 
     </main>
   );

@@ -1,4 +1,6 @@
 
+import BottomNav from "./components/BottomNav";
+
 import { useEffect, useMemo, useState } from "react";
 
 import Calendar from "./components/Calendar";
@@ -974,332 +976,201 @@ function App() {
 
   /*
   |--------------------------------------------------------------------------
-  | EVENTOS SALVOS
-  |--------------------------------------------------------------------------
-  */
-
-  if (telaAtual === "salvos") {
-    return (
-      <SavedEvents
-        events={savedEvents}
-        fotoPerfil={usuario?.fotoPerfil}
-        onRemove={removerEventoSalvo}
-        onOpenExplore={() =>
-          setTelaAtual("explorar")
-        }
-        onOpenMap={() =>
-          setTelaAtual("mapa")
-        }
-        onOpenProfile={() =>
-          setTelaAtual("perfil")
-        }
-      />
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | PERFIL
-  |--------------------------------------------------------------------------
-  */
-
-  if (telaAtual === "perfil") {
-    return (
-      <UserProfile
-        usuario={usuario}
-        onPhotoChange={handlePhotoChange}
-        onBack={() =>
-          setTelaAtual("explorar")
-        }
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | AGENDA
-  |--------------------------------------------------------------------------
-  */
-
-  if (telaAtual === "agenda") {
-    return (
-      <main className="app agenda-screen">
-        <header className="top-bar">
-          <button
-            type="button"
-            className="back-button"
-            onClick={() =>
-              setTelaAtual("explorar")
-            }
-            aria-label="Voltar"
-          >
-            ‹
-          </button>
-
-          <div>
-            <h1>Agenda</h1>
-            <p>Eventos culturais do mês</p>
-          </div>
-
-          <div className="top-bar-actions">
-            <button
-              type="button"
-              className="catalog-button"
-              onClick={() =>
-                setTelaAtual("catalogo")
-              }
-            >
-              Catálogo
-            </button>
-
-            <button
-              type="button"
-              className="profile-button"
-              aria-label="Abrir perfil"
-              onClick={() =>
-                setTelaAtual("perfil")
-              }
-            >
-              {usuario?.fotoPerfil ? (
-                <img
-                  src={usuario.fotoPerfil}
-                  alt="Foto de perfil"
-                />
-              ) : (
-                "👤"
-              )}
-            </button>
-          </div>
-        </header>
-
-        <Calendar
-          currentDate={currentDate}
-          selectedDate={selectedDate}
-          events={events}
-          onDateChange={handleDateChange}
-          onPreviousMonth={handlePreviousMonth}
-          onNextMonth={handleNextMonth}
-        />
-
-        <section className="events-section">
-          <p className="selected-date">
-            {formatSelectedDate()}
-          </p>
-
-          {loadingEvents && (
-            <p>Carregando eventos...</p>
-          )}
-
-          {selectedEvents.length > 0 ? (
-            selectedEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                onClick={() =>
-                  handleEventClick(event)
-                }
-              />
-            ))
-          ) : (
-            !loadingEvents && (
-              <div className="empty-state">
-                <p>
-                  Nenhum evento encontrado nesta data.
-                </p>
-              </div>
-            )
-          )}
-        </section>
-
-        <nav className="bottom-navigation">
-          <button
-            type="button"
-            onClick={() =>
-              setTelaAtual("explorar")
-            }
-          >
-            <span>⌂</span>
-            <small>Explorar</small>
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              setTelaAtual("salvos")
-            }
-          >
-            <span>♡</span>
-            <small>Salvos</small>
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              setTelaAtual("perfil")
-            }
-          >
-            <span>♙</span>
-            <small>Perfil</small>
-          </button>
-        </nav>
-      </main>
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | CATÁLOGO
-  |--------------------------------------------------------------------------
-  */
-
-  if (telaAtual === "catalogo") {
-    return (
-      <CatalogoEventos
-        usuario={usuario}
-        onOpenProfile={() =>
-          setTelaAtual("perfil")
-        }
-        onVoltar={() =>
-          setTelaAtual("agenda")
-        }
-      />
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | EXPLORAR EVENTOS
-  |--------------------------------------------------------------------------
-  */
-
-  if (telaAtual === "explorar") {
-    return (
-      <ExploreEvents
-        events={events}
-        savedEvents={savedEvents}
-        onToggleSaved={toggleSavedEvent}
-        fotoPerfil={usuario?.fotoPerfil}
-        onOpenMap={() =>
-          setTelaAtual("mapa")
-        }
-        onOpenAgenda={() =>
-          setTelaAtual("agenda")
-        }
-        onOpenSaved={() =>
-          setTelaAtual("salvos")
-        }
-        onOpenProfile={() =>
-          setTelaAtual("perfil")
-        }
-      />
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | MAPA
+  | TELAS DO USUÁRIO (COM NAVBAR ÚNICA E FIXA)
   |--------------------------------------------------------------------------
   */
 
   return (
-    <main className="app">
-      <header className="top-area">
-        <div className="top-controls">
-          <button
-            type="button"
-            className="menu-button"
-            aria-label="Abrir agenda"
-            onClick={() =>
-              setTelaAtual("agenda")
-            }
-          >
-            ☰
-          </button>
+    <>
+      {telaAtual === "salvos" && (
+        <SavedEvents
+          events={savedEvents}
+          fotoPerfil={usuario?.fotoPerfil}
+          onRemove={removerEventoSalvo}
+          onOpenExplore={() => setTelaAtual("explorar")}
+          onOpenMap={() => setTelaAtual("mapa")}
+          onOpenProfile={() => setTelaAtual("perfil")}
+        />
+      )}
 
-          <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
+      {telaAtual === "perfil" && (
+        <UserProfile
+          usuario={usuario}
+          onPhotoChange={handlePhotoChange}
+          onBack={() => setTelaAtual("explorar")}
+          onLogout={handleLogout}
+        />
+      )}
+
+      {telaAtual === "agenda" && (
+        <main className="app agenda-screen">
+          <header className="top-bar">
+            <button
+              type="button"
+              className="back-button"
+              onClick={() => setTelaAtual("explorar")}
+              aria-label="Voltar"
+            >
+              ‹
+            </button>
+
+            <div>
+              <h1>Agenda</h1>
+              <p>Eventos culturais do mês</p>
+            </div>
+
+            <div className="top-bar-actions">
+              <button
+                type="button"
+                className="catalog-button"
+                onClick={() => setTelaAtual("catalogo")}
+              >
+                Catálogo
+              </button>
+
+              <button
+                type="button"
+                className="profile-button"
+                aria-label="Abrir perfil"
+                onClick={() => setTelaAtual("perfil")}
+              >
+                {usuario?.fotoPerfil ? (
+                  <img
+                    src={usuario.fotoPerfil}
+                    alt="Foto de perfil"
+                  />
+                ) : (
+                  "👤"
+                )}
+              </button>
+            </div>
+          </header>
+
+          <Calendar
+            currentDate={currentDate}
+            selectedDate={selectedDate}
+            events={events}
+            onDateChange={handleDateChange}
+            onPreviousMonth={handlePreviousMonth}
+            onNextMonth={handleNextMonth}
           />
 
-          <button
-            type="button"
-            className="profile-button"
-            aria-label="Abrir perfil"
-            onClick={() =>
-              setTelaAtual("perfil")
-            }
-          >
-            {usuario?.fotoPerfil ? (
-              <img
-                src={usuario.fotoPerfil}
-                alt="Foto de perfil"
-              />
-            ) : (
-              "👤"
+          <section className="events-section">
+            <p className="selected-date">
+              {formatSelectedDate()}
+            </p>
+
+            {loadingEvents && (
+              <p>Carregando eventos...</p>
             )}
-          </button>
-        </div>
 
-        <CategoryFilters
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+            {selectedEvents.length > 0 ? (
+              selectedEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onClick={() => handleEventClick(event)}
+                />
+              ))
+            ) : (
+              !loadingEvents && (
+                <div className="empty-state">
+                  <p>
+                    Nenhum evento encontrado nesta data.
+                  </p>
+                </div>
+              )
+            )}
+          </section>
+        </main>
+      )}
+
+      {telaAtual === "catalogo" && (
+        <CatalogoEventos
+          usuario={usuario}
+          onOpenProfile={() => setTelaAtual("perfil")}
+          onVoltar={() => setTelaAtual("agenda")}
         />
+      )}
 
-        <p className="map-hint">
-          Toque em um ícone para ver informações culturais
-        </p>
-      </header>
+      {telaAtual === "explorar" && (
+        <ExploreEvents
+          events={events}
+          savedEvents={savedEvents}
+          onToggleSaved={toggleSavedEvent}
+          fotoPerfil={usuario?.fotoPerfil}
+          onOpenMap={() => setTelaAtual("mapa")}
+          onOpenAgenda={() => setTelaAtual("agenda")}
+          onOpenSaved={() => setTelaAtual("salvos")}
+          onOpenProfile={() => setTelaAtual("perfil")}
+        />
+      )}
 
-      <MapView
-        points={filteredPoints}
-        userLocation={userLocation}
-      />
+      {telaAtual === "mapa" && (
+        <main className="app">
+          <header className="top-area">
+            <div className="top-controls">
+              <button
+                type="button"
+                className="menu-button"
+                aria-label="Abrir agenda"
+                onClick={() => setTelaAtual("agenda")}
+              >
+                ☰
+              </button>
 
-      <div className="map-counter">
-        📍 {filteredPoints.length}{" "}
-        {filteredPoints.length === 1
-          ? "ponto"
-          : "pontos"}
-      </div>
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+              />
 
-      <UserLocationButton
-        onLocationFound={setUserLocation}
-      />
+              <button
+                type="button"
+                className="profile-button"
+                aria-label="Abrir perfil"
+                onClick={() => setTelaAtual("perfil")}
+              >
+                {usuario?.fotoPerfil ? (
+                  <img
+                    src={usuario.fotoPerfil}
+                    alt="Foto de perfil"
+                  />
+                ) : (
+                  "👤"
+                )}
+              </button>
+            </div>
 
-      <nav className="bottom-navigation">
-        <button
-          type="button"
-          className="active"
-          onClick={() =>
-            setTelaAtual("explorar")
-          }
-        >
-          <span>⌂</span>
-          <small>Explorar</small>
-        </button>
+            <CategoryFilters
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
 
-        <button
-          type="button"
-          onClick={() =>
-            setTelaAtual("salvos")
-          }
-        >
-          <span>♡</span>
-          <small>Salvos</small>
-        </button>
+            <p className="map-hint">
+              Toque em um ícone para ver informações culturais
+            </p>
+          </header>
 
-        <button
-          type="button"
-          onClick={() =>
-            setTelaAtual("perfil")
-          }
-        >
-          <span>♙</span>
-          <small>Perfil</small>
-        </button>
-      </nav>
-    </main>
+          <MapView
+            points={filteredPoints}
+            userLocation={userLocation}
+          />
+
+          <div className="map-counter">
+            📍 {filteredPoints.length}{" "}
+            {filteredPoints.length === 1
+              ? "ponto"
+              : "pontos"}
+          </div>
+
+          <UserLocationButton
+            onLocationFound={setUserLocation}
+          />
+        </main>
+      )}
+
+      <BottomNav telaAtual={telaAtual} onNavigate={setTelaAtual} />
+    </>
   );
 }
 
